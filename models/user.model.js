@@ -2,15 +2,15 @@ const mongoose = require("mongoose");
 const config = require("../config/config");
 
 const passwordValidator =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-])[A-Za-z\d!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-]{8,}$/;
-
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-])[A-Za-z\d!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-]{9,}$/;
+    const phoneNumberValidator = /^[+]?[0-9]{10,15}$/;
 const userSchema = new mongoose.Schema(
     {
         username: {
             type: String,
             required: true,
             unique: true,
-            lowrcase: true,
+            lowercase: true,
         },
         email: {
             type: String,
@@ -22,7 +22,12 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            lowercase: true,
+            validate: {
+                validator: function (v) {
+                    return phoneNumberValidator.test(v);
+                },
+                message: "Phone number must be a valid number with 10-15 digits, optionally starting with a '+'",
+            },
         },
         role: {
             type: String,
@@ -53,12 +58,22 @@ const userSchema = new mongoose.Schema(
                     "Password must be at least 8 characters, contain a special character, an uppercase letter, and a number.",
             },
         },
+        passwordResetToken: { type: String, select: false },
+        passwordResetExpires: { type: Date, select: false },
+        refreshToken: { type: String, select: false },
+        otp: {
+            type: String,
+            select: false,
+          },
+          otpExpires: Date,
+          otpRequestedAt: {
+            type: Date,
+            default: Date.now,
+          },
     },
+    
     { timestamps: true }
 );
 
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-
-const User = mongoose.model('User', userSchema);
-module.exports = User
+const User = mongoose.model("User", userSchema);
+module.exports = User;
