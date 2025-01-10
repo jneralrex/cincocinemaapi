@@ -3,10 +3,14 @@ const config = require("./config/config");
 const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
+const helmet = require('helmet');
+
 
 
 const app = express()
 const port = config.port
+app.use(helmet());
+
 connectDB();
 
 app.use(express.json());

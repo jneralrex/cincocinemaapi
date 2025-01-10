@@ -10,9 +10,11 @@ const config = {
     refresh_token_expiration: process.env.REFRESH_TOKEN_EXPIRATION,
     cookie_expiration: process.env.COOKIE_EXPIRATION,
     reset_password_expiration: process.env.RESET_PASSWORD_EXPIRATION,
-    email: process.env.EMAIL,
-    email_password: process.env.EMAIL_PASSWORD,
+    email: process.env.SMTP_EMAIL,
+    email_password: process.env.SMTP_PASSWORD,
     otp_expiration: process.env.OTP_EXPIRATION,
     unverified_user_expiration: process.env.UNVERIFIED_USER_EXPIRATION,
+    otp_first_arg: process.env.OTP_FIRST_ARG,
+    otp_second_arg: process.env.OTP_SECOND_ARG,
 };
 module.exports = config;

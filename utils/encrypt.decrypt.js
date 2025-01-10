@@ -1,9 +1,12 @@
 const crypto = require("crypto");
 const config = require("../config/config");
 
+// Ensure the key length is 24 bytes (for AES-192)
+const getValidKey = (key) => key.padEnd(24, '0').slice(0, 24);  // Pad to 24 bytes if shorter, slice if longer
+
 const encryptToken = (token) => {
   const algorithm = "aes-192-cbc";
-  const secretkey = config.refresh_token_secret;
+  const secretkey = getValidKey(config.refresh_token_secret);  // Use the validated key
   const iv = crypto.randomBytes(16);
 
   const cipher = crypto.createCipheriv(algorithm, secretkey, iv);
@@ -14,9 +17,11 @@ const encryptToken = (token) => {
 
 const decryptToken = (hash) => {
   const [iv, encryptedToken] = hash.split(":");
+  const secretkey = getValidKey(config.refresh_token_secret);  // Use the validated key
+
   const decipher = crypto.createDecipheriv(
     "aes-192-cbc",
-    config.refresh_token_secret,
+    secretkey,
     Buffer.from(iv, "hex")
   );
   const decrypted = Buffer.concat([
