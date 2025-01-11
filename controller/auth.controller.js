@@ -2,12 +2,9 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const generateRandomUsername = require("../utils/generateRandomUsername");
 const errorHandler = require("../utils/errorHandler");
-const config = require("../config/config");
+const {config} = require("../config/config");
 const { encryptToken, decryptToken } = require("../utils/encrypt.decrypt");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../utils/generate.accessToken.refreshToken");
+const { generateAccessToken, generateRefreshToken} = require("../utils/generate.accessToken.refreshToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 
@@ -16,7 +13,7 @@ const signUp = async (req, res, next) => {
 
   try {
     if (!username || !email || !phoneNumber || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return next(errorHandler(403, "All fields are required", "ValidationError"))
     }
 
     const usernameCheck = await User.findOne({ username });
@@ -30,12 +27,12 @@ const signUp = async (req, res, next) => {
 
     const emailCheck = await User.findOne({ email });
     if (emailCheck) {
-      return res.status(400).json({ message: "This email is already registered." });
+      return next(errorHandler(400, "Email is already registered", "ValidationError"));
     }
 
     const phoneCheck = await User.findOne({ phoneNumber });
     if (phoneCheck) {
-      return res.status(400).json({ message: "This phone number is already registered." });
+      return next(errorHandler(400, "Phone number is already registered", "ValidationError"));
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -96,23 +93,24 @@ const signIn = async (req, res, next) => {
     const { password: _, refreshToken: __, ...userData } = validUser.toObject();
 
     res
-      .cookie("accesstoken", accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
-        expires: new Date(Date.now() + Number(config.cookie_expiration)),
-      })
-      .cookie("refreshtoken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Lax",
-        expires: new Date(Date.now() + Number(config.refresh_token_expiration)),
-      })
-      .status(200)
-      .json({
-        message: "Login successful",
-        user: userData,
-      });
+    .cookie("accesstoken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      expires: new Date(Date.now() + Number(config.cookie_expiration)),
+    })
+    .cookie("refreshtoken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      expires: new Date(Date.now() + Number(config.refresh_token_expiration)),
+    })
+    .status(200)
+    .json({
+      message: "Login successful",
+      user: userData,
+    });
+  
   } catch (error) {
     next(error);
   }

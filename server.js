@@ -1,8 +1,9 @@
 const express = require("express");
-const config = require("./config/config");
+const {config} = require("./config/config");
 const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
+const locationRoutes = require("./routes/location.routes");
 const helmet = require('helmet');
 
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/location", locationRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;

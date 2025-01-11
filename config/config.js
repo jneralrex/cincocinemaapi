@@ -1,4 +1,6 @@
 require("dotenv").config();
+const cloudinary = require("cloudinary").v2;
+
 const config = {
     db_connection: process.env.MONGO_URI,
     port: process.env.PORT,
@@ -15,6 +17,13 @@ const config = {
     otp_expiration: process.env.OTP_EXPIRATION,
     unverified_user_expiration: process.env.UNVERIFIED_USER_EXPIRATION,
     otp_first_arg: process.env.OTP_FIRST_ARG,
-    otp_second_arg: process.env.OTP_SECOND_ARG,
+    otp_second_arg: process.env.OTP_SECOND_ARG
 };
-module.exports = config;
+
+cloudinary.config({
+    cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
+    cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
+module.exports = {config, cloudinary};

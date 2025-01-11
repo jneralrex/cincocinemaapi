@@ -3,7 +3,7 @@ const User = require("../models/user.model");
 const generateRandomUsername = async (username) => {
     const suggestions = [];
     const maxSuggestions = 3;
-    const maxAttempts = 100; // Prevent infinite loop
+    const maxAttempts = 100; 
   
     let attempts = 0;
     while (suggestions.length < maxSuggestions && attempts < maxAttempts) {

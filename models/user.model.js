@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const config = require("../config/config");
+const {config} = require("../config/config");
 
 const passwordValidator =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-])[A-Za-z\d!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-]{9,}$/;
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema(
         role: {
             type: String,
             enum: ["user", "counter", "theatre-admin", "web-admin"],
-            default: "user",
+            default: "web-admin",
             lowercase: true,
         },
         profilePhoto: {
