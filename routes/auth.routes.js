@@ -11,4 +11,4 @@ router.patch("/resetpassword/:resetToken", changePassword);
 router.post("/verifyotp", verifyOtp);
 router.post("/resendotp", resendOtp);
 
-module.exports = router;
+module.exports = router; 

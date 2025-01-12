@@ -3,7 +3,8 @@ const config = require("./config/config");
 const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
-
+const classRoute = require('./routes/classRoutes');
+const rowRoute = require('./routes/rowRoutes')
 
 const app = express()
 const port = config.port
@@ -13,6 +14,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/class", classRoute);
+app.use("/api/row", rowRoute);
+
+
 
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
