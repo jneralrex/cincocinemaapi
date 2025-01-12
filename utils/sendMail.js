@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const config = require("../config/config");
+const {config} = require("../config/config");
 
 const transporter = nodemailer.createTransport({
     service: "Gmail", 
@@ -9,11 +9,11 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendEmail = async (to, subject, message) => {
+const sendEmail = async (email, subject, message) => {
     try {
         const mailOptions = {
             from: config.email, 
-            to, 
+            to: email, 
             subject, 
             text: message, 
         };
