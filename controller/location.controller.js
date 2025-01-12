@@ -36,7 +36,7 @@ const editState = async (req, res, next) => {
     const location = await Location.findOne({ "location.state": state });
 
     if (!location) {
-      return next(errorHandler("State not found", "ValidationError"));
+      return next(errorHandler(404, "State not found", "ValidationError"));
     }
 
     location.location[0].state = newState;
@@ -55,7 +55,7 @@ const editCity = async (req, res, next) => {
     const location = await Location.findOne({ "location.state": state });
 
     if (!location) {
-      return next(errorHandler("State not found", "ValidationError"));
+      return next(errorHandler(404, "State not found", "ValidationError"));
     }
 
     const cityIndex = location.location[0].cities.findIndex(
@@ -63,7 +63,7 @@ const editCity = async (req, res, next) => {
     );
 
     if (cityIndex === -1) {
-      return next(errorHandler("City not found", "ValidationError"));
+      return next(errorHandler(404, "City not found", "ValidationError"));
     }
 
     if (newCity) location.location[0].cities[cityIndex].city = newCity;
@@ -87,7 +87,7 @@ const deleteState = async (req, res, next) => {
       );
   
       if (!location) {
-        return next(errorHandler("State not found", "ValidationError"));
+        return next(errorHandler(404, "State not found", "ValidationError"));
       }
   
       if (location.location.length === 0) {
@@ -100,7 +100,7 @@ const deleteState = async (req, res, next) => {
       next(error); 
     }
 };
-  
+
 
 const deleteCity = async (req, res, next) => {
   const { state, city } = req.params;

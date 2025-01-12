@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const screenSchema = mongoose(
+const screenSchema = new mongoose.Schema(
   {
     screenName: {
       type: String,

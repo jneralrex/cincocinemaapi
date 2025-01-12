@@ -30,7 +30,7 @@ const verifyTokensAndRole = async (req, res, next) => {
       const decodedRefreshToken = jwt.verify(refreshToken, config.refresh_token_secret);
 
       if (decodedRefreshToken._id !== decodedAccessToken._id) { 
-        return next(errorHandler('Token mismatch', 'Unauthorized'));
+        return next(errorHandler(403, 'Token mismatch', 'Unauthorized'));
       }
     } catch (err) {
       return next(errorHandler('Invalid refresh token', 'Unauthorized'));
@@ -38,13 +38,13 @@ const verifyTokensAndRole = async (req, res, next) => {
 
     const allowedRoles = ['theatre-admin', 'web-admin'];
     if (!allowedRoles.includes(user.role)) {
-      return next(errorHandler('Unauthorized: Insufficient permissions', 'Unauthorized'));
+      return next(errorHandler(403, 'Unauthorized: Insufficient permissions', 'Unauthorized'));
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return next(errorHandler('Unauthorized: Invalid tokens', 'Unauthorized'));
+    return next(errorHandler(403, 'Unauthorized: Invalid tokens', 'Unauthorized'));
   }
 };
 
