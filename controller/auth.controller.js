@@ -19,20 +19,17 @@ const signUp = async (req, res, next) => {
     const usernameCheck = await User.findOne({ username });
     if (usernameCheck) {
       const suggestions = await generateRandomUsername(username);
-      return res.status(400).json({
-        message: "Username already taken. Try any of these.",
-        suggestions: suggestions,
-      });
+      return next(errorHandler(403, "Username is already taken, here are some available name", "ValidationError", suggestions));
     }
 
     const emailCheck = await User.findOne({ email });
     if (emailCheck) {
-      return next(errorHandler(400, "Email is already registered", "ValidationError"));
+      return next(errorHandler(403, "Email is already registered", "ValidationError"));
     }
 
     const phoneCheck = await User.findOne({ phoneNumber });
     if (phoneCheck) {
-      return next(errorHandler(400, "Phone number is already registered", "ValidationError"));
+      return next(errorHandler(403, "Phone number is already registered", "ValidationError"));
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -67,7 +64,7 @@ const signIn = async (req, res, next) => {
   const { usernameOrEmail, password } = req.body;
   try {
     if (!usernameOrEmail || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return next(errorHandler(400, "All fields are required", "ValidationError"));
     }
 
     const sanitizedInput = usernameOrEmail.trim().toLowerCase();
@@ -76,12 +73,12 @@ const signIn = async (req, res, next) => {
     }).select("+password");
 
     if (!validUser) {
-      return next(errorHandler(400, "Invalid credentials"));
+      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
     }
 
     const isMatch = await bcrypt.compare(password, validUser.password);
     if (!isMatch) {
-      return next(errorHandler(400, "Invalid credentials"));
+      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
     }
 
     const accessToken = generateAccessToken(validUser);
@@ -136,19 +133,19 @@ const handleRefreshToken = async (req, res, next) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return next(errorHandler(400, "Refresh token is required"));
+      return next(errorHandler(403, "Refresh token is required", "ValidationError"));
     }
 
     const user = await User.findOne({
       refreshToken: encryptToken(refreshToken),
     }).select("+refreshToken");
     if (!user) {
-      return next(errorHandler(403, "Invalid refresh token"));
+      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
     const storedToken = decryptToken(user.refreshToken);
     if (storedToken !== refreshToken) {
-      return next(errorHandler(403, "Invalid refresh token"));
+      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
     const newAccessToken = generateAccessToken(user);
@@ -178,11 +175,9 @@ const changePassword = async (req, res, next) => {
           return next(errorHandler(400, "All fields are required", "ValidationError"));
       }
 
-      // Check if the new password meets the criteria
       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
 
 
-      // Check if the new password is the same as the old one
       if (oldPassword === newPassword) {
           return next(errorHandler(400, "New password cannot be the same as old password", "ValidationError"));
       }
@@ -201,7 +196,6 @@ const changePassword = async (req, res, next) => {
           return next(errorHandler(403, "Incorrect old password", "ValidationError"));
       }
 
-      // Hash the new password and save it
       user.password = await bcrypt.hash(newPassword, 10);
       await user.save();
 
@@ -216,7 +210,7 @@ const forgotPassword = async (req, res, next) => {
 
     try {
         if (!email) {
-            return res.status(400).json({ message: "Email is required" });
+            return next(errorHandler(400, "Email is required", "ValidationError"));
         };
 
         const user = await User.findOne({ email });
