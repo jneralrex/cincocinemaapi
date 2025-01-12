@@ -17,13 +17,14 @@ const config = {
     otp_expiration: process.env.OTP_EXPIRATION,
     unverified_user_expiration: process.env.UNVERIFIED_USER_EXPIRATION,
     otp_first_arg: process.env.OTP_FIRST_ARG,
-    otp_second_arg: process.env.OTP_SECOND_ARG
+    otp_second_arg: process.env.OTP_SECOND_ARG,
+    duration_checker:process.env.DURATION_MULTIPLIER
 };
 
 cloudinary.config({
-    cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
-    cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
 module.exports = {config, cloudinary};

@@ -1,21 +1,21 @@
 const mongoose = require("mongoose");
+const { config } = require("../config/config");
 
 const adsSchema = new mongoose.Schema({
     adsTitle: {
         type: String,
         required: true,
-        unique: true,
     },
-    adsBoody: {
+    adsBody: {
         type: String,
         required: true,
-        unique: true,
     },
     adsImage: {
         type: String,
     },
     adsLink: {
         type: String,
+        match: [/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/, 'Invalid URL format'], 
     },
     active: {
         type: Boolean,
@@ -24,11 +24,12 @@ const adsSchema = new mongoose.Schema({
     durationDays: {
         type: Number,
         default: 30,
+        required: true
     },
     expireAt: {
         type: Date,
         default: function () {
-            return new Date(Date.now() + this.durationDays * 24 * 60 * 60 * 1000);
+            return new Date(Date.now() + this.durationDays * config.duration_checker);
         },
     },
 }, { timestamps: true });
