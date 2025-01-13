@@ -27,23 +27,26 @@ app.use(
 );
 
 const allowedOrigins = [
-  config.front_end_url_1,
+  config.front_end_url_1, // Add your trusted frontend URLs here
   config.front_end_url_2,
-  "http://localhost:5173",
+  'http://localhost:5173', // Add your local development URL if needed
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests without origin (for local testing or postman requests)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 };
 
 app.use(cors(corsOptions));
+
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
