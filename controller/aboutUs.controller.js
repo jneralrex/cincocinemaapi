@@ -4,11 +4,12 @@ const errorHandler = require("../utils/errorHandler");
 
 const createAboutUs = async (req, res, next) => {
     try {
-      // Accessing the text fields for social media icons
       const socialMediaIcons = [];
       for (let i = 0; i < 2; i++) {
+        // Upload each social media image to Cloudinary and capture the response, including the public_id
         const socialIcon = {
-          socialImage: req.files?.[`aboutUsSocialMediaIcons[${i}][socialImage]`]?.[0]?.path, // Cloudinary URL
+          socialImage: req.files?.[`aboutUsSocialMediaIcons[${i}][socialImage]`]?.[0]?.path,
+          socialImagePublicId: req.files?.[`aboutUsSocialMediaIcons[${i}][socialImage]`]?.[0]?.public_id, // Get public_id from the upload response
           socialName: req.body?.[`aboutUsSocialMediaIcons[${i}][socialName]`],
           socialLink: req.body?.[`aboutUsSocialMediaIcons[${i}][socialLink]`],
         };
@@ -32,10 +33,8 @@ const createAboutUs = async (req, res, next) => {
     } catch (error) {
       next(error);
     }
+  };
   
-};
- 
-   
 const viewAboutUs = async (req, res, next) => {
   try {
     const aboutUs = await AboutUs.findOne();
@@ -53,52 +52,54 @@ const viewAboutUs = async (req, res, next) => {
 };
 
 const updateAboutUs = async (req, res, next) => {
-  const { id } = req.params;
-  const { aboutUsTitle, aboutUsBody, aboutUsSocialMediaIcons } = req.body;
-
-  try {
-    const updatedIcons = [];
-    for (let icon of aboutUsSocialMediaIcons) {
-      if (icon.socialImage) {
-        const uploadResult = await cloudinary.uploader.upload(icon.socialImage, {
-          folder: "social_media_icons",
-        });
-
-        updatedIcons.push({
-          socialName: icon.socialName,
-          socialImage: uploadResult.secure_url,
-          socialImagePublicId: uploadResult.public_id,
-          socialLink: icon.socialLink,
-        });
-      } else {
-        // Keeps the previous image and link if no new image is provided
-        updatedIcons.push({
-          socialName: icon.socialName,
-          socialImage: icon.socialImage,
-          socialImagePublicId: icon.socialImagePublicId,
-          socialLink: icon.socialLink,
-        });
+    const { id } = req.params;
+    const { aboutUsTitle, aboutUsBody, aboutUsSocialMediaIcons } = req.body;
+  
+    try {
+      const updatedIcons = [];
+      for (let icon of aboutUsSocialMediaIcons) {
+        if (icon.socialImage) {
+          // Upload the new image to Cloudinary and get the public_id
+          const uploadResult = await cloudinary.uploader.upload(icon.socialImage, {
+            folder: "social_media_icons",
+          });
+  
+          updatedIcons.push({
+            socialName: icon.socialName,
+            socialImage: uploadResult.secure_url, // The URL of the uploaded image
+            socialImagePublicId: uploadResult.public_id, // Store the Cloudinary public_id for future reference
+            socialLink: icon.socialLink,
+          });
+        } else {
+          // If no new image is provided, keep the existing image details
+          updatedIcons.push({
+            socialName: icon.socialName,
+            socialImage: icon.socialImage,
+            socialImagePublicId: icon.socialImagePublicId, // Keep the existing public_id
+            socialLink: icon.socialLink,
+          });
+        }
       }
+  
+      const updatedAboutUs = await AboutUs.findByIdAndUpdate(
+        id,
+        { aboutUsTitle, aboutUsBody, aboutUsSocialMediaIcons: updatedIcons },
+        { new: true }
+      );
+  
+      if (!updatedAboutUs) {
+        return next(errorHandler(404, "About Us document not found", "NotFound"));
+      }
+  
+      res.status(200).json({
+        message: "About Us updated successfully",
+        data: updatedAboutUs,
+      });
+    } catch (error) {
+      next(error);
     }
-
-    const updatedAboutUs = await AboutUs.findByIdAndUpdate(
-      id,
-      { aboutUsTitle, aboutUsBody, aboutUsSocialMediaIcons: updatedIcons },
-      { new: true }
-    );
-
-    if (!updatedAboutUs) {
-      return next(errorHandler(404, "About Us document not found", "NotFound"));
-    }
-
-    res.status(200).json({
-      message: "About Us updated successfully",
-      data: updatedAboutUs,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  };
+  
 
 const deleteAboutUs = async (req, res, next) => {
   const { id } = req.params;

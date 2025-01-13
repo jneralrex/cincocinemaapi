@@ -9,6 +9,8 @@ const adsRoutes = require("./routes/ads.routes");
 const aboutInfoRoutes = require("./routes/aboutUs.routes");
 const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
+const cors = require('cors');
+
 
 const app = express();
 const port = config.port;
@@ -25,36 +27,49 @@ app.use(
   })
 );
 
+
+const allowedOrigins = [
+  config.front_end_url_1,
+  config.front_end_url_2,
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+};
+
+app.use(cors(corsOptions));
+
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
 app.use("/api/v1/ads", adsRoutes);
 app.use("/api/v1/info", aboutInfoRoutes);
 
-// Global error handler
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   const errorMessage = err.message || "Internal Server Error";
 
-  // Handle specific errors
   if (err.name === "ValidationError") {
     return res.status(400).json({ success: false, message: errorMessage });
   }
 
-  // Handle MongoDB connection error
   if (err.name === "MongoError") {
     return res.status(500).json({ success: false, message: "Database error occurred." });
   }
 
-  // Handle connection timeout error
   if (err.name === "ConnectionTimeOut") {
     return res.status(408).json({ success: false, message: "Connection timeout." });
   }
 
-  // Log the error stack for debugging
-  console.error("Error caught by errorHandler:", err.stack);
 
-  // Send a generic error response
   res.status(statusCode).json({
     success: false,
     message: errorMessage,

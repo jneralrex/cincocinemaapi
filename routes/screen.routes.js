@@ -4,7 +4,7 @@ const { viewAllScreens, viewScreen, createScreen, editScreen, deleteScreen } = r
 const router = express();
 
 router.get("/all-screens", verifyTokensAndRole, viewAllScreens);
-router.get("/screen/:id", verifyTokensAndRole, viewScreen);
+router.get("/screen/:id", viewScreen);
 router.post("/create-screen", verifyTokensAndRole, createScreen);
 router.put("/edit-screen/:id", verifyTokensAndRole, editScreen);
 router.delete("/delete-screen/:id", verifyTokensAndRole, deleteScreen);

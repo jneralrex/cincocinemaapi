@@ -18,7 +18,9 @@ const config = {
     unverified_user_expiration: process.env.UNVERIFIED_USER_EXPIRATION,
     otp_first_arg: process.env.OTP_FIRST_ARG,
     otp_second_arg: process.env.OTP_SECOND_ARG,
-    duration_checker:process.env.DURATION_MULTIPLIER
+    duration_checker:process.env.DURATION_MULTIPLIER,
+    front_end_url_1:process.env.FRONT_END_URL_1,
+    front_end_url_2:process.env.FRONT_END_URL_2,
 };
 
 cloudinary.config({

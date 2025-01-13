@@ -9,10 +9,9 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 
 const signUp = async (req, res, next) => {
-  const { username, email, phoneNumber, password } = req.body;
-
+  const { username, email, phoneNumber, password, role } = req.body;
   try {
-    if (!username || !email || !phoneNumber || !password) {
+    if (!username || !email || !phoneNumber || !password || !role) {
       return next(errorHandler(403, "All fields are required", "ValidationError"))
     }
 
@@ -34,7 +33,6 @@ const signUp = async (req, res, next) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Hash OTP with bcrypt
     const hashedOtp = await bcrypt.hash(otp, 10);
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -43,6 +41,7 @@ const signUp = async (req, res, next) => {
       username,
       email,
       phoneNumber,
+      role,
       otp: hashedOtp,
       otpExpires: Date.now() + config.otp_expiration,
       otpRequestedAt: Date.now(),
