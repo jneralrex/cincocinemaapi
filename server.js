@@ -28,24 +28,24 @@ app.use(
 );
 
 
-const allowedOrigins = [
-  // config.front_end_url_1,
-  // config.front_end_url_2,
-  "*",
-];
+// const allowedOrigins = [
+//   // config.front_end_url_1,
+//   // config.front_end_url_2,
+//   "*",
+// ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-};
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+// };
 
-app.use(cors(corsOptions));
+app.use(cors(/*{corsOptions}*/));
 
 
 app.use("/api/v1/auth", authRoutes);
