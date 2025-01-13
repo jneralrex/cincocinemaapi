@@ -9,8 +9,7 @@ const adsRoutes = require("./routes/ads.routes");
 const aboutInfoRoutes = require("./routes/aboutUs.routes");
 const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
-const cors = require('cors');
-
+const cors = require("cors");
 
 const app = express();
 const port = config.port;
@@ -27,26 +26,24 @@ app.use(
   })
 );
 
+const allowedOrigins = [
+  config.front_end_url_1,
+  config.front_end_url_2,
+  "http://localhost:5173",
+];
 
-// const allowedOrigins = [
-//   // config.front_end_url_1,
-//   // config.front_end_url_2,
-//   "*",
-// ];
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],
+};
 
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-// };
-
-app.use(cors(/*{corsOptions}*/));
-
+app.use(cors(corsOptions));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
@@ -63,13 +60,16 @@ app.use((err, req, res, next) => {
   }
 
   if (err.name === "MongoError") {
-    return res.status(500).json({ success: false, message: "Database error occurred." });
+    return res
+      .status(500)
+      .json({ success: false, message: "Database error occurred." });
   }
 
   if (err.name === "ConnectionTimeOut") {
-    return res.status(408).json({ success: false, message: "Connection timeout." });
+    return res
+      .status(408)
+      .json({ success: false, message: "Connection timeout." });
   }
-
 
   res.status(statusCode).json({
     success: false,
