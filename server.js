@@ -29,8 +29,9 @@ app.use(
 
 
 const allowedOrigins = [
-  config.front_end_url_1,
-  config.front_end_url_2,
+  // config.front_end_url_1,
+  // config.front_end_url_2,
+  "*",
 ];
 
 const corsOptions = {

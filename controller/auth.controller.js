@@ -92,14 +92,14 @@ const signIn = async (req, res, next) => {
     .cookie("accesstoken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      expires: new Date(Date.now() + Number(config.cookie_expiration)),
+      sameSite: 'strict',
+      maxAge: config.cookie_expiration,
     })
     .cookie("refreshtoken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      expires: new Date(Date.now() + Number(config.refresh_token_expiration)),
+      sameSite: 'strict',
+      maxAge: config.refresh_token_expiration,
     })
     .status(200)
     .json({
@@ -129,7 +129,7 @@ const signOut = async (req, res, next) => {
 
 const handleRefreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.refreshtoken;
 
     if (!refreshToken) {
       return next(errorHandler(403, "Refresh token is required", "ValidationError"));
@@ -138,12 +138,15 @@ const handleRefreshToken = async (req, res, next) => {
     const user = await User.findOne({
       refreshToken: encryptToken(refreshToken),
     }).select("+refreshToken");
+
     if (!user) {
+      res.clearCookie("refreshtoken");
       return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
     const storedToken = decryptToken(user.refreshToken);
     if (storedToken !== refreshToken) {
+      res.clearCookie("refreshtoken");
       return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
@@ -154,7 +157,12 @@ const handleRefreshToken = async (req, res, next) => {
     await user.save();
 
     res
-      .cookie("refreshtoken", newRefreshToken, { httpOnly: true, secure: true })
+      .cookie("refreshtoken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: config.refresh_token_expiration
+      })
       .status(200)
       .json({
         message: "Token refreshed successfully",
