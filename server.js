@@ -14,11 +14,26 @@ const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
+const classRoute = require('./routes/classRoutes');
+const rowRoute = require('./routes/rowRoutes')
+const locationRoutes = require("./routes/location.routes");
+const helmet = require('helmet');
+
+
+
 
 const app = express();
-const port = config.port;
+const port = config.port
+app.use(helmet());
 
 connectDB();
+
+cronJobs();
+
+app.use('/uploads',express.static(path.join(__dirname, "uploads")));
+app.use(express.json());
+app.use(cookieParser());
+
 
 cronJobs();
 
@@ -51,7 +66,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
@@ -60,7 +74,8 @@ app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/review", reviewRoutes);
-
+app.use("/api/class", classRoute);
+app.use("/api/row", rowRoute);
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
