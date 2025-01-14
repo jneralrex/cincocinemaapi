@@ -16,7 +16,6 @@ const cors = require("cors");
 const path = require("path");
 const classRoute = require('./routes/classRoutes');
 const rowRoute = require('./routes/rowRoutes')
-const locationRoutes = require("./routes/location.routes");
 const helmet = require('helmet');
 
 
