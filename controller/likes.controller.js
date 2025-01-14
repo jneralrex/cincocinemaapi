@@ -1,4 +1,4 @@
-const Likes = require("../models/Likes.model");
+const Likes = require("../models/likes.model");
 const errorHandler = require("../utils/errorHandler");
 
 
