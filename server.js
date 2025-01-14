@@ -7,9 +7,11 @@ const locationRoutes = require("./routes/location.routes");
 const screenRoutes = require("./routes/screen.routes");
 const adsRoutes = require("./routes/ads.routes");
 const aboutInfoRoutes = require("./routes/aboutUs.routes");
+const movieRouter = require("./routes/movie.routes");
 const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const port = config.port;
@@ -18,6 +20,7 @@ connectDB();
 
 cronJobs();
 
+app.use('/uploads',express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -53,6 +56,7 @@ app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
 app.use("/api/v1/ads", adsRoutes);
 app.use("/api/v1/info", aboutInfoRoutes);
+app.use("/api/v1/movies", movieRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
