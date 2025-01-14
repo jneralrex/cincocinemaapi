@@ -6,8 +6,10 @@ const authRoutes = require("./routes/auth.routes");
 const locationRoutes = require("./routes/location.routes");
 const screenRoutes = require("./routes/screen.routes");
 const adsRoutes = require("./routes/ads.routes");
-const aboutInfoRoutes = require("./routes/aboutUs.routes");
+const likeRoutes = require("./routes/likes.routes");
+const userRoutes = require("./routes/user.routes");
 const movieRouter = require("./routes/movie.routes");
+const reviewRoutes = require("./routes/reviews.routes");
 const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
@@ -30,14 +32,13 @@ app.use(
 );
 
 const allowedOrigins = [
-  config.front_end_url_1, // Add your trusted frontend URLs here
+  config.front_end_url_1, 
   config.front_end_url_2,
-  'http://localhost:5173', // Add your local development URL if needed
+  'http://localhost:5173', 
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests without origin (for local testing or postman requests)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -45,7 +46,7 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  credentials: true, 
 };
 
 app.use(cors(corsOptions));
@@ -55,8 +56,11 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
 app.use("/api/v1/ads", adsRoutes);
-app.use("/api/v1/info", aboutInfoRoutes);
-app.use("/api/v1/movies", movieRouter);
+app.use("/api/v1/movies", movieRouter); 
+app.use("/api/v1/likes", likeRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/review", reviewRoutes);
+
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;

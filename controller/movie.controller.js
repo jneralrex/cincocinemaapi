@@ -1,4 +1,3 @@
-// const Movie = require('')
 
 const mongoose = require("mongoose");
 const Movie = require("../models/movie.model")
@@ -65,6 +64,7 @@ const getSingleMovie = async (req, res) => {
         res.status(400).json({ success: false, error: error.message });
     }
 };
+
 const updateMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -73,25 +73,34 @@ const updateMovie = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Invalid movie ID' });
         }
 
-        const movie = await Movie.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true,
-        });
+        const movie = await Movie.findById(id);
 
         if (!movie) {
             return res.status(404).json({ success: false, message: 'Movie not found' });
         }
 
-        res.status(200).json({ 
-            success: true, 
-            message: 'Movie updated successfully', 
-            data: movie 
+        const thumbnail = req.files.thumbnail ? req.files.thumbnail[0] : movie.thumbnail;
+        const banner = req.files.banner ? req.files.banner[0] : movie.banner;
+
+        movie.set({
+            ...req.body,
+            thumbnail: thumbnail ? { url: thumbnail.path, public_id: thumbnail.filename } : movie.thumbnail,
+            banner: banner ? { url: banner.path, public_id: banner.filename } : movie.banner
+        });
+
+        await movie.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Movie updated successfully',
+            data: movie
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
 const deleteMovie = async (req, res) => {
     try {
         const { id } = req.params;
