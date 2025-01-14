@@ -16,7 +16,6 @@ const cors = require("cors");
 const path = require("path");
 const classRoute = require('./routes/classRoutes');
 const rowRoute = require('./routes/rowRoutes')
-const helmet = require('helmet');
 
 
 
@@ -26,13 +25,6 @@ const port = config.port
 app.use(helmet());
 
 connectDB();
-
-cronJobs();
-
-app.use('/uploads',express.static(path.join(__dirname, "uploads")));
-app.use(express.json());
-app.use(cookieParser());
-
 
 cronJobs();
 
