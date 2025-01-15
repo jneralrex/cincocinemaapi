@@ -4,6 +4,10 @@ const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const locationRoutes = require("./routes/location.routes");
+const screenRoute = require("./routes/screen.routes");
+const helmet = require('helmet');
+const classRoutes = require('./routes/classRoutes')
+const rowRoutes = require('./routes/rowRoutes')
 const screenRoutes = require("./routes/screen.routes");
 const adsRoutes = require("./routes/ads.routes");
 const likeRoutes = require("./routes/likes.routes");
@@ -37,6 +41,11 @@ app.use(
   })
 );
 
+app.use("/api/auth", authRoutes);
+app.use("/api/location", locationRoutes);
+app.use("/api/screen", screenRoute);
+app.use("/api/class", classRoutes);
+app.use("/api/row", rowRoutes);
 const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,

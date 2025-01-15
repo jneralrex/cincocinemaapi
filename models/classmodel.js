@@ -23,6 +23,6 @@ const classSchema = new mongoose.Schema({
 {timestamps:true}
 );
 
-const classModel = mongoose.model('SeatClass', classSchema);
+const classModel = mongoose.model('Class', classSchema);
 
 module.exports = classModel;
