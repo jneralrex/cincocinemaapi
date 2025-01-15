@@ -72,12 +72,12 @@ const signIn = async (req, res, next) => {
     }).select("+password");
 
     if (!validUser) {
-      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
+      return next(errorHandler(401, "Invalid credentials", "Unauthorized"));
     }
 
     const isMatch = await bcrypt.compare(password, validUser.password);
     if (!isMatch) {
-      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
+      return next(errorHandler(401, "Invalid credentials", "Unauthorized"));
     }
 
     const accessToken = generateAccessToken(validUser);
@@ -89,26 +89,26 @@ const signIn = async (req, res, next) => {
     const { password: _, refreshToken: __, ...userData } = validUser.toObject();
 
     res
-    .cookie("accesstoken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'strict',
-      maxAge: config.cookie_expiration,
-    })
-    .cookie("refreshtoken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: 'strict',
-      maxAge: config.refresh_token_expiration,
-    })
-    .status(200)
-    .json({
-      message: "Login successful",
-      user: userData,
-    });
-  
+      .cookie("accesstoken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: config.cookie_expiration,
+      })
+      .cookie("refreshtoken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: config.refresh_token_expiration,
+      })
+      .status(200)
+      .json({
+        message: "Login successful",
+        user: userData,
+      });
   } catch (error) {
-    next(error);
+    console.error("SignIn Error:", error);
+    next(errorHandler(500, "Internal server error"));
   }
 };
 
@@ -132,7 +132,7 @@ const handleRefreshToken = async (req, res, next) => {
     const refreshToken = req.cookies?.refreshtoken;
 
     if (!refreshToken) {
-      return next(errorHandler(403, "Refresh token is required", "ValidationError"));
+      return next(errorHandler(403, "Refresh token is required", "Forbidden"));
     }
 
     const user = await User.findOne({
@@ -141,13 +141,13 @@ const handleRefreshToken = async (req, res, next) => {
 
     if (!user) {
       res.clearCookie("refreshtoken");
-      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
+      return next(errorHandler(403, "Invalid refresh token", "Forbidden"));
     }
 
     const storedToken = decryptToken(user.refreshToken);
     if (storedToken !== refreshToken) {
       res.clearCookie("refreshtoken");
-      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
+      return next(errorHandler(403, "Invalid refresh token", "Forbidden"));
     }
 
     const newAccessToken = generateAccessToken(user);
@@ -161,7 +161,7 @@ const handleRefreshToken = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: config.refresh_token_expiration
+        maxAge: config.refresh_token_expiration,
       })
       .status(200)
       .json({
@@ -169,8 +169,8 @@ const handleRefreshToken = async (req, res, next) => {
         token: newAccessToken,
       });
   } catch (error) {
-    console.error("Error handling refresh token:", error);
-    next(errorHandler(500, "Server error"));
+    console.error("HandleRefreshToken Error:", error);
+    next(errorHandler(500, "Internal server error"));
   }
 };
 
