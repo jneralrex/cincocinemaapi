@@ -4,13 +4,19 @@ const mongoose = require("mongoose");
 // Create a new time entry
 exports.createTime = async (req, res) => {
     try {
-        const { dateId, showTimes, isActive } = req.body;
+        const { movieId, dateId, showTimes, isActive } = req.body;
+
+        // Validate ObjectIds
+        if (!mongoose.Types.ObjectId.isValid(movieId)) {
+            return res.status(400).json({ error: "Invalid Movie ID" });
+        }
 
         if (!mongoose.Types.ObjectId.isValid(dateId)) {
             return res.status(400).json({ error: "Invalid Date ID" });
         }
 
-        const newTime = new TimeModel({ dateId, showTimes, isActive });
+        // Create a new Time entry
+        const newTime = new TimeModel({ movieId, dateId, showTimes, isActive });
         const savedTime = await newTime.save();
 
         res.status(201).json(savedTime);
@@ -22,7 +28,10 @@ exports.createTime = async (req, res) => {
 // Get all time entries
 exports.getAllTimes = async (req, res) => {
     try {
-        const times = await TimeModel.find().populate("dateId").exec();
+        const times = await TimeModel.find()
+            .populate("movieId")
+            .populate("dateId")
+            .exec();
         res.status(200).json(times);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -38,7 +47,10 @@ exports.getTimeById = async (req, res) => {
             return res.status(400).json({ error: "Invalid ID" });
         }
 
-        const time = await TimeModel.findById(id).populate("dateId").exec();
+        const time = await TimeModel.findById(id)
+            .populate("movieId")
+            .populate("dateId")
+            .exec();
 
         if (!time) {
             return res.status(404).json({ error: "Time entry not found" });
