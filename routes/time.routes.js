@@ -14,7 +14,7 @@ const router = express();
 router.get("/all-times", verifyTokensAndRole, getAllTimes);
 
 
-router.get("/time/:id", verifyTokensAndRole, getTimeById);
+router.get("/time/:id",  getTimeById);
 
 
 router.post("/create-time", verifyTokensAndRole, createTime);

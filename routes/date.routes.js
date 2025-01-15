@@ -14,7 +14,7 @@ const router = express();
 router.get("/all-dates", verifyTokensAndRole, getAllScreeningDates);
 
 
-router.get("/date/:id", verifyTokensAndRole, getScreeningDateById);
+router.get("/date/:id", getScreeningDateById);
 
 
 router.post("/create-date", verifyTokensAndRole, createScreeningDate);
