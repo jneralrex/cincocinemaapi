@@ -3,15 +3,13 @@ const {config} = require("./config/config");
 const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
-<<<<<<< HEAD
-const classRoute = require('./routes/classRoutes');
-const rowRoute = require('./routes/rowRoutes')
-=======
 const locationRoutes = require("./routes/location.routes");
+const screenRoute = require("./routes/screen.routes");
 const helmet = require('helmet');
+const classRoutes = require('./routes/classRoutes')
+const rowRoutes = require('./routes/rowRoutes')
 
 
->>>>>>> af0217bc83c0eca389c3fdac6d4655585cda90ba
 
 const app = express()
 const port = config.port
@@ -23,14 +21,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
-<<<<<<< HEAD
-app.use("/api/class", classRoute);
-app.use("/api/row", rowRoute);
-
-
-=======
 app.use("/api/location", locationRoutes);
->>>>>>> af0217bc83c0eca389c3fdac6d4655585cda90ba
+app.use("/api/screen", screenRoute);
+app.use("/api/class", classRoutes);
+app.use("/api/row", rowRoutes);
 
 app.use((err, req, res, next) => {
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
