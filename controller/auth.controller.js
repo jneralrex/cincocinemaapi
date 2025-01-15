@@ -9,35 +9,30 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 
 const signUp = async (req, res, next) => {
-  const { username, email, phoneNumber, password } = req.body;
-
+  const { username, email, phoneNumber, password, role } = req.body;
   try {
-    if (!username || !email || !phoneNumber || !password) {
+    if (!username || !email || !phoneNumber || !password || !role) {
       return next(errorHandler(403, "All fields are required", "ValidationError"))
     }
 
     const usernameCheck = await User.findOne({ username });
     if (usernameCheck) {
       const suggestions = await generateRandomUsername(username);
-      return res.status(400).json({
-        message: "Username already taken. Try any of these.",
-        suggestions: suggestions,
-      });
+      return next(errorHandler(403, "Username is already taken, here are some available name", "ValidationError", suggestions));
     }
 
     const emailCheck = await User.findOne({ email });
     if (emailCheck) {
-      return next(errorHandler(400, "Email is already registered", "ValidationError"));
+      return next(errorHandler(403, "Email is already registered", "ValidationError"));
     }
 
     const phoneCheck = await User.findOne({ phoneNumber });
     if (phoneCheck) {
-      return next(errorHandler(400, "Phone number is already registered", "ValidationError"));
+      return next(errorHandler(403, "Phone number is already registered", "ValidationError"));
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Hash OTP with bcrypt
     const hashedOtp = await bcrypt.hash(otp, 10);
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,6 +41,7 @@ const signUp = async (req, res, next) => {
       username,
       email,
       phoneNumber,
+      role,
       otp: hashedOtp,
       otpExpires: Date.now() + config.otp_expiration,
       otpRequestedAt: Date.now(),
@@ -67,7 +63,7 @@ const signIn = async (req, res, next) => {
   const { usernameOrEmail, password } = req.body;
   try {
     if (!usernameOrEmail || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return next(errorHandler(400, "All fields are required", "ValidationError"));
     }
 
     const sanitizedInput = usernameOrEmail.trim().toLowerCase();
@@ -76,12 +72,12 @@ const signIn = async (req, res, next) => {
     }).select("+password");
 
     if (!validUser) {
-      return next(errorHandler(400, "Invalid credentials"));
+      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
     }
 
     const isMatch = await bcrypt.compare(password, validUser.password);
     if (!isMatch) {
-      return next(errorHandler(400, "Invalid credentials"));
+      return next(errorHandler(400, "Invalid credentials", "ValidationError"));
     }
 
     const accessToken = generateAccessToken(validUser);
@@ -96,14 +92,14 @@ const signIn = async (req, res, next) => {
     .cookie("accesstoken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      expires: new Date(Date.now() + Number(config.cookie_expiration)),
+      sameSite: 'strict',
+      maxAge: config.cookie_expiration,
     })
     .cookie("refreshtoken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      expires: new Date(Date.now() + Number(config.refresh_token_expiration)),
+      sameSite: 'strict',
+      maxAge: config.refresh_token_expiration,
     })
     .status(200)
     .json({
@@ -133,22 +129,25 @@ const signOut = async (req, res, next) => {
 
 const handleRefreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.refreshtoken;
 
     if (!refreshToken) {
-      return next(errorHandler(400, "Refresh token is required"));
+      return next(errorHandler(403, "Refresh token is required", "ValidationError"));
     }
 
     const user = await User.findOne({
       refreshToken: encryptToken(refreshToken),
     }).select("+refreshToken");
+
     if (!user) {
-      return next(errorHandler(403, "Invalid refresh token"));
+      res.clearCookie("refreshtoken");
+      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
     const storedToken = decryptToken(user.refreshToken);
     if (storedToken !== refreshToken) {
-      return next(errorHandler(403, "Invalid refresh token"));
+      res.clearCookie("refreshtoken");
+      return next(errorHandler(403, "Invalid refresh token", "ValidationError"));
     }
 
     const newAccessToken = generateAccessToken(user);
@@ -158,7 +157,12 @@ const handleRefreshToken = async (req, res, next) => {
     await user.save();
 
     res
-      .cookie("refreshtoken", newRefreshToken, { httpOnly: true, secure: true })
+      .cookie("refreshtoken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: config.refresh_token_expiration
+      })
       .status(200)
       .json({
         message: "Token refreshed successfully",
@@ -178,11 +182,9 @@ const changePassword = async (req, res, next) => {
           return next(errorHandler(400, "All fields are required", "ValidationError"));
       }
 
-      // Check if the new password meets the criteria
       const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
 
 
-      // Check if the new password is the same as the old one
       if (oldPassword === newPassword) {
           return next(errorHandler(400, "New password cannot be the same as old password", "ValidationError"));
       }
@@ -201,7 +203,6 @@ const changePassword = async (req, res, next) => {
           return next(errorHandler(403, "Incorrect old password", "ValidationError"));
       }
 
-      // Hash the new password and save it
       user.password = await bcrypt.hash(newPassword, 10);
       await user.save();
 
@@ -216,7 +217,7 @@ const forgotPassword = async (req, res, next) => {
 
     try {
         if (!email) {
-            return res.status(400).json({ message: "Email is required" });
+            return next(errorHandler(400, "Email is required", "ValidationError"));
         };
 
         const user = await User.findOne({ email });
@@ -340,7 +341,6 @@ const resendOtp = async (req, res, next) => {
     next(error);
   }
 };
-
 
 module.exports = {
   signUp,

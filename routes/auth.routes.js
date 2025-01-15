@@ -3,6 +3,12 @@ const { signUp, signIn, handleRefreshToken, signOut, forgotPassword, changePassw
 const router = express.Router();
 
 router.post("/signup", signUp);
+router.post("/counter/signup", signUp);
+router.post("/web-admin/signup", signUp);
+router.post("/theatre-admin/signup", signUp);
+
+
+
 router.post("/signin", signIn);
 router.post("/refreshtoken", handleRefreshToken);
 router.post("/signout", signOut);
