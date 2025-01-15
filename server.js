@@ -4,28 +4,28 @@ const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const locationRoutes = require("./routes/location.routes");
+const helmet = require('helmet');
+const classRoutes = require('./routes/classRoutes')
+const rowRoutes = require('./routes/rowRoutes')
 const screenRoutes = require("./routes/screen.routes");
 const adsRoutes = require("./routes/ads.routes");
 const likeRoutes = require("./routes/likes.routes");
 const userRoutes = require("./routes/user.routes");
 const movieRouter = require("./routes/movie.routes");
 const reviewRoutes = require("./routes/reviews.routes");
-const helmet = require("helmet");
+const airingDateRoutes = require("./routes/date.routes");
+const airingTimeRoutes = require("./routes/time.routes");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
-const classRoute = require('./routes/classRoutes');
-const rowRoute = require('./routes/rowRoutes')
-
 
 
 
 const app = express();
 const port = config.port
-app.use(helmet());
+
 
 connectDB();
-
 cronJobs();
 
 app.use('/uploads',express.static(path.join(__dirname, "uploads")));
@@ -36,6 +36,7 @@ app.use(
     contentSecurityPolicy: false,
   })
 );
+
 
 const allowedOrigins = [
   config.front_end_url_1, 
@@ -65,8 +66,11 @@ app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/review", reviewRoutes);
-app.use("/api/class", classRoute);
-app.use("/api/row", rowRoute);
+app.use("/api/v1/class", classRoutes);
+app.use("/api/v1/row", rowRoutes);
+app.use("/api/v1/airingdate", airingDateRoutes);
+app.use("/api/v1/airingtime", airingTimeRoutes);
+
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
