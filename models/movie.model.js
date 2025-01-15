@@ -69,7 +69,7 @@ const movieSchema = new mongoose.Schema({
     crew: [personSchema],
     streaming_location:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'streaming_location',
+        ref: 'Location',
         // required: true,
     },
     streaming_date:{
