@@ -342,7 +342,6 @@ const resendOtp = async (req, res, next) => {
   }
 };
 
-
 module.exports = {
   signUp,
   signIn,
