@@ -5,7 +5,7 @@ const getValidKey = (key) => key.padEnd(24, '0').slice(0, 24);
 
 const encryptToken = (token) => {
   const algorithm = "aes-192-cbc";
-  const secretkey = getValidKey(config.refresh_token_secret);  
+  const secretkey = getValidKey(config.jwt_s);  
   const iv = crypto.randomBytes(16);
 
   const cipher = crypto.createCipheriv(algorithm, secretkey, iv);
@@ -16,7 +16,7 @@ const encryptToken = (token) => {
 
 const decryptToken = (hash) => {
   const [iv, encryptedToken] = hash.split(":");
-  const secretkey = getValidKey(config.refresh_token_secret); 
+  const secretkey = getValidKey(config.jwt_s); 
 
   const decipher = crypto.createDecipheriv(
     "aes-192-cbc",

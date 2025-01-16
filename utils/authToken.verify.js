@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {config} = require('../config/config');
+const { config } = require('../config/config');
 const User = require('../models/user.model');
 const errorHandler = require('./errorHandler');
 
@@ -27,7 +27,7 @@ const verifyTokensAndRole = async (req, res, next) => {
     }
 
     try {
-      const decodedRefreshToken = jwt.verify(refreshToken, config.refresh_token_secret);
+      const decodedRefreshToken = jwt.verify(refreshToken, config.jwt_s);
 
       if (decodedRefreshToken._id !== decodedAccessToken._id) { 
         return next(errorHandler(403, 'Token mismatch', 'Unauthorized'));

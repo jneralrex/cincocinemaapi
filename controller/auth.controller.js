@@ -115,13 +115,13 @@ const signIn = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-        maxAge: config.cookie_expiration,
+        maxAge: config.jwt_expires
       })
       .cookie("refreshtoken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-        maxAge: config.refresh_token_expiration,
+        maxAge: config.jwt_refresh_expire
       })
       .status(200)
       .json({
@@ -131,21 +131,6 @@ const signIn = async (req, res, next) => {
   } catch (error) {
     console.error("SignIn Error:", error);
     next(errorHandler(500, "Internal server error"));
-  }
-};
-
-const signOut = async (req, res, next) => {
-  try {
-    const { user } = req;
-    user.refreshToken = null;
-    await user.save();
-    res
-      .clearCookie("accesstoken")
-      .clearCookie("refreshtoken")
-      .status(200)
-      .json({ message: "Logout successful" });
-  } catch (error) {
-    next(error);
   }
 };
 
@@ -183,7 +168,7 @@ const handleRefreshToken = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
-        maxAge: config.refresh_token_expiration,
+        maxAge: config.jwt_refresh_expire
       })
       .status(200)
       .json({
@@ -193,6 +178,21 @@ const handleRefreshToken = async (req, res, next) => {
   } catch (error) {
     console.error("HandleRefreshToken Error:", error);
     next(errorHandler(500, "Internal server error"));
+  }
+};
+
+const signOut = async (req, res, next) => {
+  try {
+    const { user } = req;
+    user.refreshToken = null;
+    await user.save();
+    res
+      .clearCookie("accesstoken")
+      .clearCookie("refreshtoken")
+      .status(200)
+      .json({ message: "Logout successful" });
+  } catch (error) {
+    next(error);
   }
 };
 
