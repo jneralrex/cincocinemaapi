@@ -182,7 +182,7 @@ const handleRefreshToken = async (req, res, next) => {
       .cookie("refreshtoken", newRefreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
         maxAge: config.refresh_token_expiration,
       })
       .status(200)
