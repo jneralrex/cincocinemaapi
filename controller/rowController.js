@@ -6,28 +6,32 @@ const rowController={
     
     // Create a new row
     async createRow(req, res, next) {
-        try {
-          const { rowName, seatCount } = req.body;
-      
-          const existingRow = await rowModel.findOne({ rowName });
-          if (existingRow) {
-            return next(errorHandler(403, "Row already exists", "ValidationError"));
-          }
-          const seats = Array.from({ length: seatCount }, (_, index) => ({
-            seatId: index + 1,
-          }));
-      
-          const newRow = new rowModel({
-            rowName,
-            seats,
-          });
-      
-          await newRow.save();
-          res.status(201).json({ message: 'Row created successfully', data: newRow });
-        } catch (error) {
-          next(error); 
+      try {
+        const { rowName, seatIds } = req.body;
+    
+        const existingRow = await rowModel.findOne({ rowName });
+        if (existingRow) {
+          return next(errorHandler(403, "Row already exists", "ValidationError"));
         }
-      },
+    
+        if (!Array.isArray(seatIds) || seatIds.length === 0) {
+          return next(errorHandler(400, "Seat IDs must be a non-empty array", "ValidationError"));
+        }
+    
+        const newRow = new rowModel({
+          rowName,
+          seatIds,  
+        });
+    
+        await newRow.save();
+    
+        res.status(201).json({ message: 'Row created successfully', data: newRow });
+      } catch (error) {
+        next(error);
+      }
+    },
+    
+    
       
       // Get all rows
       async getAllRows(req, res, next) {
@@ -60,7 +64,7 @@ const rowController={
         // Update a row (edit row name or add seats)
         async updateRow(req, res, next) {
             try {
-              const { rowName, newSeatCount } = req.body;
+              const { rowName } = req.body;
           
               const row = await rowModel.findById(req.params.id);
               if (!row) {
@@ -74,15 +78,6 @@ const rowController={
               }
           
               if (rowName) row.rowName = rowName;
-          
-              if (newSeatCount) {
-                const currentSeatCount = row.seats.length;
-                const additionalSeats = Array.from({ length: newSeatCount }, (_, index) => ({
-                  seatId: currentSeatCount + index + 1,
-                }));
-                row.seats.push(...additionalSeats);
-              }
-          
               await row.save();
               res.status(200).json({ message: 'Row updated successfully', data: row });
             } catch (error) {

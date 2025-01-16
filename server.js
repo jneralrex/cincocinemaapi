@@ -14,12 +14,12 @@ const likeRoutes = require("./routes/likes.routes");
 const userRoutes = require("./routes/user.routes");
 const movieRouter = require("./routes/movie.routes");
 const reviewRoutes = require("./routes/reviews.routes");
-const helmet = require("helmet");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
 const classRoute = require('./routes/classRoutes');
 const rowRoute = require('./routes/rowRoutes')
+const seatRoute = require('./routes/seatRoutes')
 
 
 
@@ -46,6 +46,7 @@ app.use("/api/location", locationRoutes);
 app.use("/api/screen", screenRoute);
 app.use("/api/class", classRoutes);
 app.use("/api/row", rowRoutes);
+app.use("/api/seat",seatRoute );
 const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,
