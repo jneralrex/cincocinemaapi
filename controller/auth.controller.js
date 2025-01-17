@@ -273,12 +273,12 @@ const forgotPassword = async (req, res, next) => {
       .digest("hex");
 
     user.passwordResetToken = hashedToken;
-    user.passwordResetExpires = Date.now() + config.reset_password_expiration; // 15 minutes
+    user.passwordResetExpires = Date.now() + config.reset_password_expiration; 
     await user.save();
 
     const resetUrl = `${req.protocol}://${req.get(
       "host"
-    )}/api/auth/resetpassword/${resetToken}`;
+    )}/rest-password/${resetToken}`;
     const message = `You requested a password reset. Click the link to reset your password: ${resetUrl}. If you did not request this, please ignore this email.`;
     const subject = "Password Reset Request";
 
