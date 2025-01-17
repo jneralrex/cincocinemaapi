@@ -278,7 +278,7 @@ const forgotPassword = async (req, res, next) => {
 
     const resetUrl = `${req.protocol}://${req.get(
       "host"
-    )}/rest-password/${resetToken}`;
+    )}/reset-password/${resetToken}`;
     const message = `You requested a password reset. Click the link to reset your password: ${resetUrl}. If you did not request this, please ignore this email.`;
     const subject = "Password Reset Request";
 
