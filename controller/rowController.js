@@ -5,31 +5,29 @@ const errorHandler = require('../utils/errorHandler');
 const rowController={
     
     // Create a new row
-    async createRow(req, res, next) {
-      try {
-        const { rowName, seatIds } = req.body;
-    
-        const existingRow = await rowModel.findOne({ rowName });
-        if (existingRow) {
-          return next(errorHandler(403, "Row already exists", "ValidationError"));
-        }
-    
-        if (!Array.isArray(seatIds) || seatIds.length === 0) {
-          return next(errorHandler(400, "Seat IDs must be a non-empty array", "ValidationError"));
-        }
-    
-        const newRow = new rowModel({
-          rowName,
-          seatIds,  
-        });
-    
-        await newRow.save();
-    
-        res.status(201).json({ message: 'Row created successfully', data: newRow });
-      } catch (error) {
-        next(error);
-      }
-    },
+async createRow(req, res, next) {
+  try {
+    const { rowName, seatIds } = req.body;
+
+    const existingRow = await rowModel.findOne({ rowName });
+    if (existingRow) {
+      return next(errorHandler(403, "Row already exists", "ValidationError"));
+    }
+
+    if (seatIds && !Array.isArray(seatIds)) {
+      return next(errorHandler(400, "Seat IDs must be an array", "ValidationError"));
+    }
+
+    const newRow = new rowModel({rowName,seatIds: seatIds || [] });
+
+    await newRow.save();
+
+    res.status(201).json({ message: 'Row created successfully', data: newRow, totalSeats: newRow.length });
+  } catch (error) {
+    next(error);
+  }
+},
+
     
     
       
