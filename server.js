@@ -15,6 +15,7 @@ const movieRouter = require("./routes/movie.routes");
 const reviewRoutes = require("./routes/reviews.routes");
 const airingDateRoutes = require("./routes/date.routes");
 const airingTimeRoutes = require("./routes/time.routes");
+const aboutRoutes = require('./routes/aboutUs.routes')
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
@@ -63,6 +64,7 @@ app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
 app.use("/api/v1/ads", adsRoutes);
 app.use("/api/v1/movies", movieRouter); 
+app.use("/api/v1/about", aboutRoutes)
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/review", reviewRoutes);
