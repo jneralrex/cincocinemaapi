@@ -17,4 +17,5 @@ const aboutSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-module.exports = mongoose.model('About', aboutSchema);
+const About = mongoose.model('About', aboutSchema);
+module.exports = About; 

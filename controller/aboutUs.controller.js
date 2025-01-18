@@ -1,25 +1,32 @@
+const mongoose = require('mongoose');
 const About = require('../models/aboutUs.model');
 
 const createAbout = async (req, res) => {
     try {
         const { title, description } = req.body;
-        const image = req.files.image[0] 
+        const image = req.file.path 
 
         if(!title || !description || !image) {
             return res.status(400).json({ success: false, message: "Please fill in all fields" });
         }
 
-        const newAbout = await About.create({ title, description, image: image.filename });
+        const aboutContent = new About({
+            title,
+            description,
+            image
+        });
+
+        const resp = await aboutContent.save();
 
         res.status(201).json({
             success: true,
             message: 'About page created successfully',
-            data: newAbout
+            data: resp
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error creating About page',
+            message: 'Error creating About page content',
             error: error.message
         });
     }
@@ -38,7 +45,7 @@ const getAllAbout = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Error retrieving About pages',
+            message: 'Error retrieving About pages content',
             error: error.message
         });
     }
@@ -75,19 +82,25 @@ const getAboutById = async (req, res) => {
 const updateAbout = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body;
+        const { title, description } = req.body;
+        const image = req.file.path 
 
-        const updatedAbout = await About.findByIdAndUpdate(id, updates, {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ success: false, message: 'Invalid aboutContent ID' });
+        }
+
+        if(!title || !description || !image) {
+            return res.status(400).json({ success: false, message: "Please fill in all fields" });
+        }
+        const newAboutContent = {
+            title,
+            description,
+            image
+        }
+        const updatedAbout = await About.findByIdAndUpdate(id, newAboutContent, {
             new: true,
             runValidators: true
         });
-
-        if (!updatedAbout) {
-            return res.status(404).json({
-                success: false,
-                message: 'About page content not found'
-            });
-        }
 
         res.status(200).json({
             success: true,
