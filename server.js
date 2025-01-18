@@ -18,6 +18,8 @@ const airingTimeRoutes = require("./routes/time.routes");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
+const seatRoute = require('./routes/seatRoutes')
+
 
 
 
@@ -70,6 +72,7 @@ app.use("/api/v1/class", classRoutes);
 app.use("/api/v1/row", rowRoutes);
 app.use("/api/v1/airingdate", airingDateRoutes);
 app.use("/api/v1/airingtime", airingTimeRoutes);
+app.use("/api/seat",seatRoute );
 
 
 app.use((err, req, res, next) => {
