@@ -4,7 +4,6 @@ const connectDB = require("./config/connectDB");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const locationRoutes = require("./routes/location.routes");
-const screenRoute = require("./routes/screen.routes");
 const helmet = require('helmet');
 const classRoutes = require('./routes/classRoutes')
 const rowRoutes = require('./routes/rowRoutes')
@@ -14,22 +13,19 @@ const likeRoutes = require("./routes/likes.routes");
 const userRoutes = require("./routes/user.routes");
 const movieRouter = require("./routes/movie.routes");
 const reviewRoutes = require("./routes/reviews.routes");
+const airingDateRoutes = require("./routes/date.routes");
+const airingTimeRoutes = require("./routes/time.routes");
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
-const classRoute = require('./routes/classRoutes');
-const rowRoute = require('./routes/rowRoutes')
-const seatRoute = require('./routes/seatRoutes')
-
 
 
 
 const app = express();
 const port = config.port
-app.use(helmet());
+
 
 connectDB();
-
 cronJobs();
 
 app.use('/uploads',express.static(path.join(__dirname, "uploads")));
@@ -41,12 +37,7 @@ app.use(
   })
 );
 
-app.use("/api/auth", authRoutes);
-app.use("/api/location", locationRoutes);
-app.use("/api/screen", screenRoute);
-app.use("/api/class", classRoutes);
-app.use("/api/row", rowRoutes);
-app.use("/api/seat",seatRoute );
+
 const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,
@@ -61,7 +52,7 @@ const corsOptions = {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   credentials: true, 
 };
 
@@ -75,8 +66,11 @@ app.use("/api/v1/movies", movieRouter);
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/review", reviewRoutes);
-app.use("/api/class", classRoute);
-app.use("/api/row", rowRoute);
+app.use("/api/v1/class", classRoutes);
+app.use("/api/v1/row", rowRoutes);
+app.use("/api/v1/airingdate", airingDateRoutes);
+app.use("/api/v1/airingtime", airingTimeRoutes);
+
 
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
