@@ -1,6 +1,11 @@
 const mongoose = require("mongoose");
 
 const timeSchema = new mongoose.Schema({
+    movieId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "movie",
+      required: [true, "Movie ID is required"],
+    },
   dateId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Date",

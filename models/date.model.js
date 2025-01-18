@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const dateSchema = new mongoose.Schema({
   movieId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Movie",
+    ref: "movie",
     required: [true, "Movie ID is required"],
   },
   screeningDates: [{

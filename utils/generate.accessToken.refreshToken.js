@@ -9,7 +9,7 @@ const generateAccessToken = (user) => {
     };
 
     const accessToken = jwt.sign(payload, config.jwt_s, {
-      expiresIn: config.cookie_expiration,
+      expiresIn: config.jwt_expires,
     });
     return accessToken;
   } catch (error) {
@@ -25,8 +25,8 @@ const generateRefreshToken = (user) => {
       role: user.role,
     };
 
-    const refreshToken = jwt.sign(payload, config.refresh_token_secret, {
-      expiresIn: config.refresh_token_expiration,
+    const refreshToken = jwt.sign(payload, config.jwt_s, {
+      expiresIn: config.jwt_refresh_expire,
     });
     return refreshToken;
   } catch (error) {
