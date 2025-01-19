@@ -6,7 +6,8 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'ads_uploads', 
-        allowedFormats: ['jpg', 'png', 'gif', 'jpeg', 'webp', 'avif'] 
+        allowedFormats: ['jpg', 'png', 'gif', 'jpeg', 'webp', 'avif'],
+        limits: { fileSize: 5 * 1024 * 1024 },
     }
 });
 

@@ -3,16 +3,16 @@ const Advertisement = require("../models/ads.model");
 const errorHandler = require("../utils/errorHandler");
 const { cloudinary } = require("../config/config");
 
-const uploadToCloudinary = async (file, folder) => {
-  try {
-    const result = await cloudinary.uploader.upload(file, { folder });
-    console.log("Cloudinary upload result:", result); 
-    return { url: result.secure_url, publicId: result.public_id };
-  } catch (error) {
-    console.error("Cloudinary upload error:", error); 
-    throw new Error("Cloudinary upload failed");
-  }
-};
+// const uploadToCloudinary = async (file, folder) => {
+//   try {
+//     const result = await cloudinary.uploader.upload(file, { folder });
+//     console.log("Cloudinary upload result:", result); 
+//     return { url: result.secure_url, publicId: result.public_id };
+//   } catch (error) {
+//     console.error("Cloudinary upload error:", error); 
+//     throw new Error("Cloudinary upload failed");
+//   }
+// };
 
 const deleteFromCloudinary = async (publicId) => {
   try {
@@ -24,26 +24,26 @@ const deleteFromCloudinary = async (publicId) => {
 
 
 const createAds = async (req, res, next) => {
-  const { adsTitle, adsBody, adsLink, durationDays } = req.body;
-  const { adsImage } = req.file;   // This is the uploaded image from the request
+  const { adsTitle, adsBody, adsLink, durationDays, adsImage, adsImagePublicId } = req.body;
+
   try {
-    if (!req.file) {
-      return next(errorHandler(400, "No file uploaded", "ValidationError"));
+    // Validate that image URL and publicId are provided
+    if (!adsImage || !adsImagePublicId) {
+      return next(errorHandler(400, "Image URL and publicId are required", "ValidationError"));
     }
+
+    // Check if an advertisement with the same title and body already exists
     const checkAds = await Advertisement.findOne({ adsTitle, adsBody });
     if (checkAds) {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
-
-    // Upload image to Cloudinary
-    const { url, publicId } = await uploadToCloudinary(req.file, "ads");
 
     // Create new advertisement with Cloudinary image data
     const newAds = new Advertisement({
       adsTitle,
       adsBody,
       durationDays,
-      adsImage: { url, publicId }, 
+      adsImage: { url: adsImage, publicId: adsImagePublicId }, // Save the uploaded image's URL and publicId
       adsLink,
     });
 
@@ -61,10 +61,9 @@ const createAds = async (req, res, next) => {
 };
 
 
-
 const viewAllAds = async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = Math.min(parseInt(req.query.limit) || 10, 100); 
 
   try {
     const ads = await Advertisement.find()
@@ -103,36 +102,21 @@ const viewSingleAds = async (req, res, next) => {
 
 const editAds = async (req, res, next) => {
   const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return next(errorHandler(400, "Invalid Advertisement ID", "ValidationError"));
-  }
+  const { adsTitle, adsBody, adsLink, durationDays, adsImage, adsImagePublicId } = req.body;
 
   try {
-    const ad = await Advertisement.findById(id);
-    if (!ad) {
-      return next(errorHandler(404, "Advertisement not found", "NotFound"));
+    const updatedData = { adsTitle, adsBody, adsLink, durationDays };
+
+    // Handle image update
+    if (adsImage && adsImagePublicId) {
+      updatedData.adsImage = { url: adsImage, publicId: adsImagePublicId };
     }
 
-    // Prepare the data to be updated
-    let updatedData = { ...req.body };
-
-    // If a new file is uploaded, handle image update
-    if (req.file) {
-      // If an existing image exists, delete it from Cloudinary
-      if (ad.adsImage && ad.adsImage.publicId) {
-        await deleteFromCloudinary(ad.adsImage.publicId);
-      }
-
-      // Upload the new image to Cloudinary
-      const { url, publicId } = await uploadToCloudinary(req.file, "ads");
-      updatedData.adsImage = { url, publicId }; // Add the new image data
-    }
-
-    // Update the advertisement in the database
     const updatedAd = await Advertisement.findByIdAndUpdate(id, updatedData, { new: true });
+    if (!updatedAd) return next(errorHandler(404, "Advertisement not found", "NotFound"));
 
     res.status(200).json({
+      status: "success",
       message: "Advertisement updated successfully",
       data: updatedAd,
     });
@@ -140,7 +124,6 @@ const editAds = async (req, res, next) => {
     next(error);
   }
 };
-
 
 
 const deleteAds = async (req, res, next) => {

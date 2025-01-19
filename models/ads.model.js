@@ -12,10 +12,14 @@ const adsSchema = new mongoose.Schema(
       required: true,
     },
     adsImage: {
-      url: { type: String, required: true },
-      publicId: { type: String, required: true },
+        url: { type: String, required: true },
+        publicId: { type: String, required: true },
+      },
+      
+    adsImagePublicId:{
+        type: String, 
+        required: true 
     },
-
     adsLink: {
       type: String,
       match: [/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/, "Invalid URL format"],
