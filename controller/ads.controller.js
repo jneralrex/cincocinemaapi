@@ -6,8 +6,10 @@ const { cloudinary } = require("../config/config");
 const uploadToCloudinary = async (file, folder) => {
   try {
     const result = await cloudinary.uploader.upload(file, { folder });
+    console.log("Cloudinary upload result:", result); 
     return { url: result.secure_url, publicId: result.public_id };
   } catch (error) {
+    console.error("Cloudinary upload error:", error); 
     throw new Error("Cloudinary upload failed");
   }
 };
@@ -25,13 +27,16 @@ const createAds = async (req, res, next) => {
   const { adsTitle, adsBody, adsLink } = req.body;
 
   try {
+    if (!req.file) {
+      return next(errorHandler(400, "No file uploaded", "ValidationError"));
+    }
+
     const checkAds = await Advertisement.findOne({ adsTitle, adsBody });
     if (checkAds) {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
 
     const { url, publicId } = await uploadToCloudinary(req.file, "ads");
-
     const newAds = new Advertisement({
       adsTitle,
       adsBody,
@@ -45,9 +50,11 @@ const createAds = async (req, res, next) => {
       data: newAds,
     });
   } catch (error) {
+    console.error("Error creating advertisement:", error); // Log error
     next(error);
   }
 };
+
 
 const viewAllAds = async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
