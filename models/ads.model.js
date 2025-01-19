@@ -13,6 +13,9 @@ const adsSchema = new mongoose.Schema({
     adsImage: {
         type: String,
     },
+    publicId: {
+        type: String,
+    },
     adsLink: {
         type: String,
         match: [/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/, 'Invalid URL format'], 

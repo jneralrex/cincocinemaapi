@@ -1,9 +1,28 @@
 const mongoose = require("mongoose");
 const Advertisement = require("../models/ads.model");
 const errorHandler = require("../utils/errorHandler");
+const { cloudinary } = require("../config/config");
+
+const uploadToCloudinary = async (file, folder) => {
+  try {
+    const result = await cloudinary.uploader.upload(file, { folder });
+    return { url: result.secure_url, publicId: result.public_id };
+  } catch (error) {
+    throw new Error("Cloudinary upload failed");
+  }
+};
+
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    throw new Error("Failed to delete file from Cloudinary");
+  }
+};
+
 
 const createAds = async (req, res, next) => {
-  const { adsTitle, adsBody, adsImage, adsLink } = req.body;
+  const { adsTitle, adsBody, adsLink } = req.body;
 
   try {
     const checkAds = await Advertisement.findOne({ adsTitle, adsBody });
@@ -11,10 +30,12 @@ const createAds = async (req, res, next) => {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
 
+    const { url, publicId } = await uploadToCloudinary(req.file.path, "ads");
+
     const newAds = new Advertisement({
       adsTitle,
       adsBody,
-      adsImage,
+      adsImage: { url, publicId },
       adsLink,
     });
 
@@ -29,16 +50,20 @@ const createAds = async (req, res, next) => {
 };
 
 const viewAllAds = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
   try {
-    const allAds = await Advertisement.find();
-    res.status(200).json({
-      message: "All advertisements fetched successfully",
-      data: allAds,
-    });
+    const ads = await Advertisement.find()
+      .skip((page - 1) * limit)
+      .limit(limit);
+    const total = await Advertisement.countDocuments();
+    res.status(200).json({ allAds: ads, total, page, limit });
   } catch (error) {
     next(error);
   }
 };
+
 
 const viewSingleAds = async (req, res, next) => {
   const { id } = req.params;
@@ -70,19 +95,33 @@ const editAds = async (req, res, next) => {
   }
 
   try {
-    const updatedAds = await Advertisement.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updatedAds) {
+    const ad = await Advertisement.findById(id);
+    if (!ad) {
       return next(errorHandler(404, "Advertisement not found", "NotFound"));
     }
 
+    let updatedData = { ...req.body };
+    if (req.file) {
+      // Delete the old image
+      if (ad.adsImage && ad.adsImage.publicId) {
+        await deleteFromCloudinary(ad.adsImage.publicId);
+      }
+      // Upload the new image
+      const { url, publicId } = await uploadToCloudinary(req.file.path, "ads");
+      updatedData.adsImage = { url, publicId };
+    }
+
+    const updatedAd = await Advertisement.findByIdAndUpdate(id, updatedData, { new: true });
+
     res.status(200).json({
       message: "Advertisement updated successfully",
-      data: updatedAds,
+      data: updatedAd,
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 const deleteAds = async (req, res, next) => {
   const { id } = req.params;
@@ -92,9 +131,14 @@ const deleteAds = async (req, res, next) => {
   }
 
   try {
-    const deletedAds = await Advertisement.findByIdAndDelete(id);
-    if (!deletedAds) {
+    const ad = await Advertisement.findByIdAndDelete(id);
+    if (!ad) {
       return next(errorHandler(404, "Advertisement not found", "NotFound"));
+    }
+
+    // Delete the image from Cloudinary if it exists
+    if (ad.adsImage && ad.adsImage.publicId) {
+      await deleteFromCloudinary(ad.adsImage.publicId);
     }
 
     res.status(200).json({
@@ -104,6 +148,7 @@ const deleteAds = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const activateAds = async (req, res, next) => {
   const { id } = req.params;
