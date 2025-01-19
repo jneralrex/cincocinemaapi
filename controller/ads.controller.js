@@ -24,36 +24,42 @@ const deleteFromCloudinary = async (publicId) => {
 
 
 const createAds = async (req, res, next) => {
-  const { adsTitle, adsBody, adsLink } = req.body;
-
+  const { adsTitle, adsBody, adsLink, durationDays } = req.body;
+  const { adsImage } = req.file;   // This is the uploaded image from the request
   try {
     if (!req.file) {
       return next(errorHandler(400, "No file uploaded", "ValidationError"));
     }
-
     const checkAds = await Advertisement.findOne({ adsTitle, adsBody });
     if (checkAds) {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
 
+    // Upload image to Cloudinary
     const { url, publicId } = await uploadToCloudinary(req.file, "ads");
+
+    // Create new advertisement with Cloudinary image data
     const newAds = new Advertisement({
       adsTitle,
       adsBody,
-      adsImage: { url, publicId },
+      durationDays,
+      adsImage: { url, publicId }, 
       adsLink,
     });
 
+    // Save the advertisement to the database
     await newAds.save();
+
     res.status(201).json({
       message: "Advertisement created successfully",
-      data: newAds,
+      data: newAds, // Return the newly created advertisement with the updated URL
     });
   } catch (error) {
-    console.error("Error creating advertisement:", error); // Log error
-    next(error);
+    console.error("Error creating advertisement:", error);
+    next(error); // Pass error to the next middleware
   }
 };
+
 
 
 const viewAllAds = async (req, res, next) => {
@@ -108,16 +114,22 @@ const editAds = async (req, res, next) => {
       return next(errorHandler(404, "Advertisement not found", "NotFound"));
     }
 
+    // Prepare the data to be updated
     let updatedData = { ...req.body };
+
+    // If a new file is uploaded, handle image update
     if (req.file) {
+      // If an existing image exists, delete it from Cloudinary
       if (ad.adsImage && ad.adsImage.publicId) {
         await deleteFromCloudinary(ad.adsImage.publicId);
       }
 
+      // Upload the new image to Cloudinary
       const { url, publicId } = await uploadToCloudinary(req.file, "ads");
-      updatedData.adsImage = { url, publicId };
+      updatedData.adsImage = { url, publicId }; // Add the new image data
     }
 
+    // Update the advertisement in the database
     const updatedAd = await Advertisement.findByIdAndUpdate(id, updatedData, { new: true });
 
     res.status(200).json({
@@ -128,6 +140,7 @@ const editAds = async (req, res, next) => {
     next(error);
   }
 };
+
 
 
 const deleteAds = async (req, res, next) => {
