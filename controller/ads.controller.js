@@ -30,7 +30,7 @@ const createAds = async (req, res, next) => {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
 
-    const { url, publicId } = await uploadToCloudinary(req.file.path, "ads");
+    const { url, publicId } = await uploadToCloudinary(req.file, "ads");
 
     const newAds = new Advertisement({
       adsTitle,
@@ -58,7 +58,8 @@ const viewAllAds = async (req, res, next) => {
       .skip((page - 1) * limit)
       .limit(limit);
     const total = await Advertisement.countDocuments();
-    res.status(200).json({ allAds: ads, total, page, limit });
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).json({ allAds: ads, total, page, totalPages, limit });
   } catch (error) {
     next(error);
   }
@@ -102,12 +103,11 @@ const editAds = async (req, res, next) => {
 
     let updatedData = { ...req.body };
     if (req.file) {
-      // Delete the old image
       if (ad.adsImage && ad.adsImage.publicId) {
         await deleteFromCloudinary(ad.adsImage.publicId);
       }
-      // Upload the new image
-      const { url, publicId } = await uploadToCloudinary(req.file.path, "ads");
+
+      const { url, publicId } = await uploadToCloudinary(req.file, "ads");
       updatedData.adsImage = { url, publicId };
     }
 
