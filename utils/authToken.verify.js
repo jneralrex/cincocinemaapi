@@ -8,7 +8,7 @@ const verifyTokensAndRole = async (req, res, next) => {
     const { accesstoken: accessToken, refreshtoken: refreshToken } = req.cookies;
 
     if (!accessToken || !refreshToken) {
-      return next(403, errorHandler('Unauthorized: Missing tokens', 'Unauthorized'));
+      return next(errorHandler(403, 'Unauthorized: Missing tokens', 'Unauthorized'));
     }
 
     let decodedAccessToken;
