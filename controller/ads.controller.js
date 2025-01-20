@@ -24,41 +24,42 @@ const deleteFromCloudinary = async (publicId) => {
 
 
 const createAds = async (req, res, next) => {
-  const { adsTitle, adsBody, adsLink, durationDays, adsImage, adsImagePublicId } = req.body;
+  const { adsTitle, adsBody, adsLink, durationDays } = req.body;
 
   try {
-    // Validate that image URL and publicId are provided
-    if (!adsImage || !adsImagePublicId) {
-      return next(errorHandler(400, "Image URL and publicId are required", "ValidationError"));
+    // Ensure the file is uploaded
+    if (!req.file) {
+      return next(errorHandler(400, "Image is required", "ValidationError"));
     }
 
-    // Check if an advertisement with the same title and body already exists
+    const { path, filename } = req.file; // From Cloudinary
+
+    // Check for duplicate advertisements
     const checkAds = await Advertisement.findOne({ adsTitle, adsBody });
     if (checkAds) {
       return next(errorHandler(403, "Advertisement already exists", "ValidationError"));
     }
 
-    // Create new advertisement with Cloudinary image data
+    // Create the new advertisement
     const newAds = new Advertisement({
       adsTitle,
       adsBody,
-      durationDays,
-      adsImage: { url: adsImage, publicId: adsImagePublicId }, // Save the uploaded image's URL and publicId
       adsLink,
+      durationDays,
+      adsImage: { url: path, publicId: filename },
     });
 
-    // Save the advertisement to the database
     await newAds.save();
 
     res.status(201).json({
       message: "Advertisement created successfully",
-      data: newAds, // Return the newly created advertisement with the updated URL
+      data: newAds,
     });
   } catch (error) {
-    console.error("Error creating advertisement:", error);
-    next(error); // Pass error to the next middleware
+    next(error);
   }
 };
+
 
 
 const viewAllAds = async (req, res, next) => {
@@ -102,14 +103,30 @@ const viewSingleAds = async (req, res, next) => {
 
 const editAds = async (req, res, next) => {
   const { id } = req.params;
-  const { adsTitle, adsBody, adsLink, durationDays, adsImage, adsImagePublicId } = req.body;
+  const { adsTitle, adsBody, adsLink, durationDays } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(errorHandler(400, "Invalid Advertisement ID", "ValidationError"));
+  }
 
   try {
+    const ad = await Advertisement.findById(id);
+    if (!ad) return next(errorHandler(404, "Advertisement not found", "NotFound"));
+
     const updatedData = { adsTitle, adsBody, adsLink, durationDays };
 
-    // Handle image update
-    if (adsImage && adsImagePublicId) {
-      updatedData.adsImage = { url: adsImage, publicId: adsImagePublicId };
+    if (req.file) {
+      const { path, filename } = req.file;
+      updatedData.adsImage = { url: path, publicId: filename };
+
+      // Delete the old image
+      if (ad.adsImage && ad.adsImage.publicId) {
+        try {
+          await deleteFromCloudinary(ad.adsImage.publicId);
+        } catch (err) {
+          console.error("Error deleting old image:", err.message);
+        }
+      }
     }
 
     const updatedAd = await Advertisement.findByIdAndUpdate(id, updatedData, { new: true });
