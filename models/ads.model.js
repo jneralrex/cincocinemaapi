@@ -1,3 +1,6 @@
+const mongoose = require("mongoose");
+const { config } = require("../config/config");
+
 const adsSchema = new mongoose.Schema(
     {
       adsTitle: {
@@ -31,6 +34,11 @@ const adsSchema = new mongoose.Schema(
     { timestamps: true }
   );
   
-  const Advertisement = mongoose.model("Advertisement", adsSchema);
-  module.exports = Advertisement;
+
   
+
+// Indexing the expireAt field the code below will automatically delete the document after the specified time but it is not recommended for production I will be using a cron job to delete the document
+
+// adsSchema.index({ expireAt: 1 }, { expireAfterSeconds: 0 });
+const Advertisement = mongoose.model("Advertisement", adsSchema);
+module.exports = Advertisement;
