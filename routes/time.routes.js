@@ -10,19 +10,10 @@ const {
 
 const router = express();
 
-
-router.get("/all-times", verifyTokensAndRole, getAllTimes);
-
-
+router.get("/all-times",verifyTokensAndRole,  getAllTimes);
 router.get("/time/:id",  getTimeById);
-
-
 router.post("/create-time", verifyTokensAndRole, createTime);
-
-
 router.put("/edit-time/:id", verifyTokensAndRole, updateTime);
-
-
 router.delete("/delete-time/:id", verifyTokensAndRole, deleteTime);
 
 module.exports = router;
