@@ -74,22 +74,22 @@ const movieSchema = new mongoose.Schema({
     },
     streaming_date:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'streaming_date',
+        ref: 'Time',
         // required: true,
     },
     streaming_time:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'streaming_time',
+        ref: 'Date',
         // required: true,
     },
     class: {
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'class',
+        ref: 'Class',
         // required: true,
     },
     seat:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'seat',
+        ref: 'Seat',
         // required: true,
     },
     isAvailable: {
