@@ -15,13 +15,14 @@ const movieRouter = require("./routes/movie.routes");
 const reviewRoutes = require("./routes/reviews.routes");
 const airingDateRoutes = require("./routes/date.routes");
 const airingTimeRoutes = require("./routes/time.routes");
+const aboutRoutes = require('./routes/aboutUs.routes')
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
-const seatRoute = require('./routes/seatRoutes')
-
-
-
+const seatRoutes = require('./routes/seatRoutes');
+const theatreRoutes = require("./routes/theatre.routes");
+const reportRoutes = require("./routes/report.routes");
+const eventRoutes = require("./routes/event.routes");
 
 const app = express();
 const port = config.port
@@ -65,6 +66,7 @@ app.use("/api/v1/location", locationRoutes);
 app.use("/api/v1/screen", screenRoutes);
 app.use("/api/v1/ads", adsRoutes);
 app.use("/api/v1/movies", movieRouter); 
+app.use("/api/v1/about", aboutRoutes)
 app.use("/api/v1/likes", likeRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/review", reviewRoutes);
@@ -72,7 +74,13 @@ app.use("/api/v1/class", classRoutes);
 app.use("/api/v1/row", rowRoutes);
 app.use("/api/v1/airingdate", airingDateRoutes);
 app.use("/api/v1/airingtime", airingTimeRoutes);
-app.use("/api/seat",seatRoute );
+app.use("/api/v1/seat",seatRoutes );
+app.use("/api/v1/theatre",theatreRoutes );
+app.use("/api/v1/report",reportRoutes);
+app.use("/api/v1/event",eventRoutes);
+
+
+
 
 
 app.use((err, req, res, next) => {
