@@ -65,13 +65,27 @@ const movieSchema = new mongoose.Schema({
             trim: true,
         }
     ],
-    cast: [personSchema],
-    crew: [personSchema],
-    streaming_location:{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'Location',
-        // required: true,
-    },
+    cast: [
+        {
+            name: { type: String, required: true, trim: true },
+            image: { type: String, required: true, trim: true },
+            stage_name: { type: String, required: true, trim: true },
+        }
+    ],
+    crew: [
+        {
+            name: { type: String, required: true, trim: true },
+            image: { type: String, required: true, trim: true },
+            stage_name: { type: String, required: true, trim: true },
+        }
+    ],
+    theatre:[
+        {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Theatre',
+            // required: true,
+        }
+    ],
     streaming_date:{
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'Time',

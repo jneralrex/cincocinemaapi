@@ -3,7 +3,7 @@ const { config } = require('../config/config');
 const User = require('../models/user.model');
 const errorHandler = require('./errorHandler');
 
-const verifyTokensAndRole = async (req, res, next) => {
+const userAuthToken = async (req, res, next) => {
   try {
     const { accesstoken: accessToken, refreshtoken: refreshToken } = req.cookies;
 
@@ -35,12 +35,6 @@ const verifyTokensAndRole = async (req, res, next) => {
     } catch (err) {
       return next(errorHandler(403, 'Invalid refresh token', 'Unauthorized'));
     }
-
-    const allowedRoles = ['theatre-admin', 'web-admin'];
-    if (!allowedRoles.includes(user.role)) {
-      return next(errorHandler(403, 'Unauthorized: Insufficient permissions', 'Unauthorized'));
-    }
-
     req.user = user;
     next();
   } catch (error) {
@@ -48,4 +42,4 @@ const verifyTokensAndRole = async (req, res, next) => {
   }
 };
 
-module.exports = verifyTokensAndRole;
+module.exports = userAuthToken;

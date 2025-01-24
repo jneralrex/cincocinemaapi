@@ -19,10 +19,10 @@ const aboutRoutes = require('./routes/aboutUs.routes')
 const cronJobs = require("./utils/cron.utils");
 const cors = require("cors");
 const path = require("path");
-const seatRoute = require('./routes/seatRoutes')
-
-
-
+const seatRoutes = require('./routes/seatRoutes');
+const theatreRoutes = require("./routes/theatre.routes");
+const reportRoutes = require("./routes/report.routes");
+const eventRoutes = require("./routes/event.routes");
 
 const app = express();
 const port = config.port
@@ -74,7 +74,13 @@ app.use("/api/v1/class", classRoutes);
 app.use("/api/v1/row", rowRoutes);
 app.use("/api/v1/airingdate", airingDateRoutes);
 app.use("/api/v1/airingtime", airingTimeRoutes);
-app.use("/api/seat",seatRoute );
+app.use("/api/v1/seat",seatRoutes );
+app.use("/api/v1/theatre",theatreRoutes );
+app.use("/api/v1/report",reportRoutes);
+app.use("/api/v1/event",eventRoutes);
+
+
+
 
 
 app.use((err, req, res, next) => {
