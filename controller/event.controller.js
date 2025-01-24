@@ -4,7 +4,6 @@ const errorHandler = require("../utils/errorHandler");
 const { cloudinary } = require("../config/config"); 
 const Location = require("../models/location.model");
 
-// Create Event
 const createEvent = async (req, res, next) => {
   const { eventName, eventHost, eventPrice, currency, eventDate, eventTime, location } = req.body;
   const file = req.file; 
@@ -16,8 +15,8 @@ const createEvent = async (req, res, next) => {
 
     const checkLocation = await Location.findById(location);
     if (!checkLocation) {
-        return next(errorHandler(404, `location does not exist`, "NotFoundError"));
-      }
+      return next(errorHandler(404, `Location does not exist`, "NotFoundError"));
+    }
 
     let uploadResponse = null;
     if (file) {
@@ -33,7 +32,7 @@ const createEvent = async (req, res, next) => {
       currency,
       eventDate,
       eventTime,
-      location:checkLocation,
+      location: checkLocation._id, // Store only the location ID
       flyerImage: uploadResponse ? uploadResponse.secure_url : undefined,
       publicId: uploadResponse ? uploadResponse.public_id : undefined,
     });
@@ -93,17 +92,16 @@ const updateEvent = async (req, res, next) => {
     return next(errorHandler(400, "Invalid Event ID", "ValidationError"));
   }
 
-  
   try {
-      const event = await Event.findById(id);
-      if (!event) {
-          return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
-        }
+    const event = await Event.findById(id);
+    if (!event) {
+      return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
+    }
 
-        const checkLocation = await Location.findById(location);
-        if (!checkLocation) {
-            return next(errorHandler(404, `location does not exist`, "NotFoundError"));
-          }
+    const checkLocation = await Location.findById(location);
+    if (!checkLocation) {
+      return next(errorHandler(404, `Location does not exist`, "NotFoundError"));
+    }
 
     let updatedData = {
       eventName,
@@ -112,7 +110,7 @@ const updateEvent = async (req, res, next) => {
       currency,
       eventDate,
       eventTime,
-      location:checkLocation,
+      location: checkLocation._id, 
     };
 
     if (flyerImage) {
