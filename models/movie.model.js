@@ -65,31 +65,45 @@ const movieSchema = new mongoose.Schema({
             trim: true,
         }
     ],
-    cast: [personSchema],
-    crew: [personSchema],
-    streaming_location:{
-        type: mongoose.SchemaTypes.ObjectId,
-        ref: 'Location',
-        // required: true,
-    },
+    cast: [
+        {
+            name: { type: String, required: true, trim: true },
+            image: { type: String, required: true, trim: true },
+            stage_name: { type: String, required: true, trim: true },
+        }
+    ],
+    crew: [
+        {
+            name: { type: String, required: true, trim: true },
+            image: { type: String, required: true, trim: true },
+            stage_name: { type: String, required: true, trim: true },
+        }
+    ],
+    theatre:[
+        {
+            type: mongoose.SchemaTypes.ObjectId,
+            ref: 'Theatre',
+            // required: true,
+        }
+    ],
     streaming_date:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'streaming_date',
+        ref: 'Time',
         // required: true,
     },
     streaming_time:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'streaming_time',
+        ref: 'Date',
         // required: true,
     },
     class: {
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'class',
+        ref: 'Class',
         // required: true,
     },
     seat:{
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'seat',
+        ref: 'Seat',
         // required: true,
     },
     isAvailable: {

@@ -6,12 +6,7 @@ const classController = {
     // Create a new class
     async createClass(req, res, next) {
       try {
-        const { className, numberOfRows, price, availability } = req.body;
-  
-        const existingClass = await classModel.findOne({ className });
-        if (existingClass) {
-          return next(errorHandler(403, "Class already exists", "ValidationError"));
-        }
+        const { className, numberOfRows,price, availability,} = req.body;
         const classes = new classModel({
           className,
           numberOfRows,
@@ -22,6 +17,7 @@ const classController = {
     
         res.status(201).json({ message: 'Seat class created successfully!', classes });
       } catch (error) {
+        res.status(500).json({ success: false, error: error.message})
         return next(errorHandler(500, error.message, error.name || "InternalError"));
       }
     },

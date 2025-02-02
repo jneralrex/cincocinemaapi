@@ -4,20 +4,29 @@ const Movie = require("../models/movie.model")
 
 const createMovie = async (req, res) => {
     try {
-        const thumbnail = req.files.thumbnail[0];
-        const banner = req.files.banner[0];
-
-        const movie = new Movie({
-            ...req.body, 
-            thumbnail:{ url: thumbnail.path, public_id: thumbnail.filename },
-            banner: { url: banner.path, public_id: banner.filename }
-        });
-        await movie.save();
-        res.status(201).json({success: true, message: "Movie created successfully" });
+      const thumbnail = req.files.thumbnail[0];
+      const banner = req.files.banner[0];
+  
+      // Parse JSON strings to objects for cast and crew
+      const cast = JSON.parse(req.body.cast);
+      const crew = JSON.parse(req.body.crew);
+  
+      const movie = new Movie({
+        ...req.body,
+        cast, // Properly parsed array of objects
+        crew, // Properly parsed array of objects
+        thumbnail: { url: thumbnail.path, public_id: thumbnail.filename },
+        banner: { url: banner.path, public_id: banner.filename },
+      });
+  
+      await movie.save();
+      res.status(201).json({ success: true, message: "Movie created successfully" });
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message });
+      console.error("Error creating movie:", error);
+      res.status(400).json({ success: false, error: error.message });
     }
-};
+  };
+  
 
 const getMovies = async (req, res) => {
     try {

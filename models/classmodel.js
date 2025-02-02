@@ -4,7 +4,7 @@ const classSchema = new mongoose.Schema({
   className: {
     type: String,
     required: true,
-    enum: ['VIP', 'Standard', 'Economy'], 
+    enum: ['vip', 'Standard', 'Economy'], 
   },
   numberOfRows: {
     type: [Number], 
