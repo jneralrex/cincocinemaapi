@@ -5,7 +5,8 @@ const config = {
     db_connection: process.env.MONGO_URI,
     port: process.env.PORT,
     defaultProfilePics: process.env.DEFAULT_PROFILE_PICS,
-    jwt_s: process.env.JWT_SECRET,
+    jwt_s: process.env.JWT_ACCESS_SECRET,
+    jwt_refresh_s: process.env.JWT_REFRESH_SECRET,
     jwt_expires: process.env.JWT_EXPIRATION,
     jwt_refresh_expire: process.env.JWT_REFRESH_EXPIRATION,
     reset_password_expiration: process.env.RESET_PASSWORD_EXPIRATION,
@@ -18,6 +19,7 @@ const config = {
     duration_checker:process.env.DURATION_MULTIPLIER,
     front_end_url_1:process.env.FRONT_END_URL_1,
     front_end_url_2:process.env.FRONT_END_URL_2,
+    cenima_role: process.env.CENIMA_ROLE,
 };
 
 cloudinary.config({

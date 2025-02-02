@@ -1,22 +1,15 @@
 const express = require("express");
-const {
-    createTheatre,
-    viewTheatre,
-    editTheatre,
-    deleteTheatre,
-    viewAllTheatres,
-  }  = require("../controller/theatre.controller");
-
 const router = express.Router();
+const { viewAllTheatres, deleteTheatre, editTheatre, viewTheatre, createTheatre } = require("../controller/theatre.controller");
 
-router.post("/create-theatre", createTheatre);
+router.post("/theatres/:theatreCinema", createTheatre);
 
-router.get("/single-theatre/:id", viewTheatre);
+router.get("/theatres/:id", viewTheatre);
 
-router.patch("/edit-theatre/:id", editTheatre);
+router.put("/theatres/:id/:theatreCinema", editTheatre);
 
-router.delete("/delete/:id", deleteTheatre);
+router.delete("/theatres/:id", deleteTheatre);
 
-router.get("/all-theatre", viewAllTheatres);
+router.get("/theatres", viewAllTheatres);
 
 module.exports = router;

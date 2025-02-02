@@ -25,7 +25,7 @@ const generateRefreshToken = (user) => {
       role: user.role,
     };
 
-    const refreshToken = jwt.sign(payload, config.jwt_s, {
+    const refreshToken = jwt.sign(payload, config.jwt_refresh_s, {
       expiresIn: config.jwt_refresh_expire,
     });
     return refreshToken;
