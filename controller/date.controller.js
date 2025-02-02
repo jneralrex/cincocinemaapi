@@ -1,21 +1,34 @@
+const axios = require("axios");
 const DateModel = require("../models/date.model");
 const mongoose = require("mongoose");
 
-// Create a new screening date
+const API_URL = "/api/v1/airingdate/all-dates"; // API endpoint
+
+// Create a new screening date (Single Date)
 exports.createScreeningDate = async (req, res) => {
     try {
         const { movieId, screeningDates } = req.body;
 
+        // Validate movie ID
         if (!mongoose.Types.ObjectId.isValid(movieId)) {
             return res.status(400).json({ error: "Invalid Movie ID" });
+        }
+
+        // Validate screeningDates array
+        if (!Array.isArray(screeningDates) || screeningDates.length === 0) {
+            return res.status(400).json({ error: "Screening dates must be an array with at least one date" });
         }
 
         const newDate = new DateModel({ movieId, screeningDates });
         const savedDate = await newDate.save();
 
+        // POST request to API with the new date
+        await axios.post(API_URL, savedDate);
+
         res.status(201).json(savedDate);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error creating screening date:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -23,13 +36,17 @@ exports.createScreeningDate = async (req, res) => {
 exports.getAllScreeningDates = async (req, res) => {
     try {
         const dates = await DateModel.find().populate("movieId").exec();
-        res.status(200).json(dates);
+        
+        // Send request to API for all dates
+        const response = await axios.get(API_URL);
+        res.status(200).json(response.data || dates);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error fetching screening dates:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
-// Get screening date by ID
+// Get a specific screening date by ID
 exports.getScreeningDateById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -39,14 +56,14 @@ exports.getScreeningDateById = async (req, res) => {
         }
 
         const date = await DateModel.findById(id).populate("movieId").exec();
-
         if (!date) {
             return res.status(404).json({ error: "Screening date not found" });
         }
 
         res.status(200).json(date);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error fetching screening date:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -61,14 +78,14 @@ exports.updateScreeningDate = async (req, res) => {
         }
 
         const updatedDate = await DateModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
-
         if (!updatedDate) {
             return res.status(404).json({ error: "Screening date not found" });
         }
 
         res.status(200).json(updatedDate);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error updating screening date:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -82,13 +99,13 @@ exports.deleteScreeningDate = async (req, res) => {
         }
 
         const deletedDate = await DateModel.findByIdAndDelete(id).exec();
-
         if (!deletedDate) {
             return res.status(404).json({ error: "Screening date not found" });
         }
 
         res.status(200).json({ message: "Screening date deleted successfully" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error deleting screening date:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
