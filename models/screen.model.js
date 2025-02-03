@@ -16,6 +16,11 @@ const screenSchema = new mongoose.Schema(
       required: true,
       toLowerCase: true,
     },
+    theatre: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Theatre",
+      required: true,
+    },
   },
   { timestamps: true }
 );

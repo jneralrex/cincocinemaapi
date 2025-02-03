@@ -205,7 +205,7 @@ const handleRefreshTokenCinema = async (req, res, next) => {
       console.error("Refresh Token Error:", error);
       next(errorHandler(500, "Internal server error"));
     }
-  };
+};
 
 const signOutCinema = async (req, res, next) => {
   try {

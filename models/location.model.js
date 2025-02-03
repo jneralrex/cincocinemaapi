@@ -24,7 +24,12 @@ const locationSchema = new mongoose.Schema({
       ],
     },
   ],
-},{
+  theatreCinema: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Cinema",
+    required: true,
+  },
+}, {
   timestamps: true
 });
 

@@ -82,6 +82,7 @@ app.use("/api/v1/event",eventRoutes);
 app.use("/api/v1/cinema",cinemaRoutes);
 
 
+
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   const errorMessage = err.message || "Internal Server Error";

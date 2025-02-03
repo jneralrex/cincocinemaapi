@@ -1,17 +1,36 @@
+const mongoose = require("mongoose");
+const Cinema = require("../models/cinema.model");
 const Location = require("../models/location.model");
 const errorHandler = require("../utils/errorHandler");
 
 const createLocation = async (req, res, next) => {
-  const { state, city, street } = req.body;
+  const { state, city, street, theatreCinema } = req.body;
+
+  // Validate required fields
+  if (!state || !city || !street || !theatreCinema) {
+    return next(errorHandler(400, "All fields including theatreCinema are required", "ValidationError"));
+  }
+
+  // Validate theatreCinema is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(theatreCinema)) {
+    return next(errorHandler(400, "Invalid theatreCinema ID", "ValidationError"));
+  }
 
   try {
-    let location = await Location.findOne({ "location.state": state });
+    // Check if the Cinema exists
+    const cinemaExists = await Cinema.findById(theatreCinema);
+    if (!cinemaExists) {
+      return next(errorHandler(404, "Cinema not found", "ValidationError"));
+    }
+
+    // Check if location with the same state already exists for the given cinema
+    let location = await Location.findOne({ "location.state": state, theatreCinema });
 
     if (location) {
-      // If state already exists, add a city to the state's cities array
+      // If state exists, add city to the state's cities array
       location.location[0].cities.push({ city, street });
     } else {
-      // Create new location if state doesn't exist
+      // Create new location if state doesn't exist for the given cinema
       location = new Location({
         location: [
           {
@@ -19,6 +38,7 @@ const createLocation = async (req, res, next) => {
             cities: [{ city, street }],
           },
         ],
+        theatreCinema, // Store cinema ID
       });
     }
 
@@ -29,14 +49,19 @@ const createLocation = async (req, res, next) => {
   }
 };
 
+
 const editState = async (req, res, next) => {
-  const { state, newState } = req.body;
+  const { state, newState, theatreCinema } = req.body;
+
+  if (!theatreCinema) {
+    return next(errorHandler(400, "theatreCinema is required", "ValidationError"));
+  }
 
   try {
-    const location = await Location.findOne({ "location.state": state });
+    const location = await Location.findOne({ "location.state": state, theatreCinema });
 
     if (!location) {
-      return next(errorHandler(404, "State not found", "ValidationError"));
+      return next(errorHandler(404, "State not found for this cinema", "ValidationError"));
     }
 
     location.location[0].state = newState;
@@ -47,6 +72,7 @@ const editState = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const editCity = async (req, res, next) => {
   const { state, city, newCity, newStreet } = req.body;
@@ -132,23 +158,33 @@ const deleteCity = async (req, res, next) => {
 };
 
 const getAllLocations = async (req, res, next) => {
+  const { theatreCinema } = req.params;
   const { page = 1, limit = 10 } = req.query;
+
+  // Validate that theatreCinema is provided
+  if (!theatreCinema) {
+    return next(errorHandler(400, "theatreCinema is required", "ValidationError"));
+  }
+
+  // Validate theatreCinema as a MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(theatreCinema)) {
+    return next(errorHandler(400, "Invalid theatreCinema ID", "ValidationError"));
+  }
 
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
 
   if (isNaN(pageNumber) || isNaN(limitNumber)) {
-    return next(
-      errorHandler(400, "Invalid pagination parameters", "ValidationError")
-    );
+    return next(errorHandler(400, "Invalid pagination parameters", "ValidationError"));
   }
 
   try {
-    const locations = await Location.find()
+    const locations = await Location.find({ theatreCinema })
       .skip((pageNumber - 1) * limitNumber)
-      .limit(limitNumber);
+      .limit(limitNumber)
+      .populate({ path: "theatreCinema", select: "cinemaName" }); // Populate after filtering
 
-    const totalLocation = await Location.countDocuments();
+    const totalLocation = await Location.countDocuments({ theatreCinema });
 
     res.status(200).json({
       success: true,
