@@ -6,30 +6,31 @@ const rowController = {
   async createRow(req, res, next) {
     try {
       const { rowName, seatIds } = req.body;
-
+  
+      if (!rowName || typeof rowName !== 'string') {
+        return next(errorHandler(400, "Row name is required and must be a string", "ValidationError"));
+      }  
       const existingRow = await rowModel.findOne({ rowName });
       if (existingRow) {
-        return next(errorHandler(403, "Row already exists", "ValidationError"));
+        return next(errorHandler(409, "Row already exists", "ValidationError"));
       }
-
-      if (seatIds && !Array.isArray(seatIds)) {
-        return next(
-          errorHandler(400, "Seat IDs must be an array", "ValidationError")
-        );
-      }
-
-      const newRow = new rowModel({ rowName, seatIds: seatIds || [] });
-
+  
+      const newRow = new rowModel({
+        rowName,
+        seatIds: seatIds || [],
+      });
+  
       await newRow.save();
-
-      res
-        .status(201)
-        .json({
-          message: "Row created successfully",
-          data: newRow,
-          totalSeats: newRow.length,
-        });
+  
+      res.status(201).json({
+        message: "Row created successfully",
+        data: newRow,
+      });
     } catch (error) {
+      console.error('Error in createRow:', error);
+      if (error.name === 'ValidationError') {
+        return next(errorHandler(400, error.message, "ValidationError"));
+      }
       next(error);
     }
   },
@@ -94,7 +95,6 @@ const rowController = {
       if (!row) {
         return next(errorHandler(404, "Row not found", "NotFoundError"));
       }
-
       res.status(200).json({ message: "Row deleted successfully" });
     } catch (error) {
       return next(errorHandler(500, error.message, "InternalError"));

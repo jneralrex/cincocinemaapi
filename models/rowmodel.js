@@ -6,18 +6,16 @@ const rowSchema = new mongoose.Schema({
     required: true,
     uppercase: true,
     match: /^[A-Z]$/, 
+    unique: true,
   },
-  seatIds: [
+   seatIds: [
     {
       type: mongoose.Schema.Types.ObjectId, 
       ref: 'Seat', 
-      required: true,
+      unique: true,
     },
   ],
-  totalSeats: {
-    type: Number,
-    default: 0,
-  },
+ 
 });
 
 rowSchema.pre('save', function (next) {

@@ -4,7 +4,7 @@ const seatSchema = new mongoose.Schema(
       seatNumber: {
         type: Number,
         required: true,
-        unique: true, 
+
       },
       isBlocked: {
         type: Boolean,
@@ -20,4 +20,4 @@ const seatSchema = new mongoose.Schema(
   
   const Seat = mongoose.model('Seat', seatSchema);
   
-  module.exports = Seat;
+  module.exports = Seat; 

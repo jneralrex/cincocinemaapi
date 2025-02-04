@@ -103,11 +103,11 @@ app.use((err, req, res, next) => {
       .json({ success: false, message: "Connection timeout." });
   }
 
-  res.status(statusCode).json({
+    res.status(statusCode).json({
     success: false,
     message: errorMessage,
   });
-});
+}); 
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
