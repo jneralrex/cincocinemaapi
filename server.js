@@ -23,6 +23,7 @@ const seatRoutes = require('./routes/seatRoutes');
 const theatreRoutes = require("./routes/theatre.routes");
 const reportRoutes = require("./routes/report.routes");
 const eventRoutes = require("./routes/event.routes");
+const cinemaRoutes = require("./routes/cinema.routes");
 
 const app = express();
 const port = config.port
@@ -78,8 +79,7 @@ app.use("/api/v1/seat",seatRoutes );
 app.use("/api/v1/theatre",theatreRoutes );
 app.use("/api/v1/report",reportRoutes);
 app.use("/api/v1/event",eventRoutes);
-
-
+app.use("/api/v1/cinema",cinemaRoutes);
 
 
 

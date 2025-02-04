@@ -1,39 +1,46 @@
 const mongoose = require("mongoose");
 const { config } = require("../config/config");
 
-const theatreSchema = new mongoose.Schema(
+const cinemaSchema = new mongoose.Schema(
   {
-    theatreName: {
+    cinemaName: {
       type: String,
       required: true,
       trim: true,
-      lowercase:true
-    },
-    theatreLocation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Location",
-      required: true,
-    },
-    theatreCinema: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Cinema",
-      required: true,
-    },
-    theatreEmail: {
-      type: String,
-      required: true,
       unique: true,
+    },
+    ownerFirstName: {
+      type: String,
+      required: true,
       trim: true,
+    },
+    ownerLastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    cinemaEmail: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
     },
     role: {
       type: String,
-      default: config.theatre_role,
+      default: config.cenima_role,
+    },
+    cinemaPhoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
     },
     password: {
       type: String,
       required: true,
       trim: true,
       select: false,
+
     },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
@@ -51,5 +58,5 @@ const theatreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Theatre = mongoose.model("Theatre", theatreSchema);
-module.exports = Theatre;
+const Cinema = mongoose.model("Cinema", cinemaSchema);
+module.exports = Cinema;

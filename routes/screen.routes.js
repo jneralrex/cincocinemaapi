@@ -1,12 +1,22 @@
-const express = require('express');
-const verifyTokensAndRole = require('../utils/authToken.verify');
-const { viewAllScreens, viewScreen, createScreen, editScreen, deleteScreen } = require('../controller/screen.controller');
-const router = express();
+const express = require("express");
+const {
+  viewAllScreens,
+  viewScreen,
+  createScreen,
+  editScreen,
+  deleteScreen,
+} = require("../controller/screen.controller");
 
-router.get("/all-screens", verifyTokensAndRole, viewAllScreens);
+const router = express.Router(); 
+
+router.get("/screens/:theatre",  viewAllScreens);
+
 router.get("/screen/:id", viewScreen);
-router.post("/create-screen", verifyTokensAndRole, createScreen);
-router.put("/edit-screen/:id", verifyTokensAndRole, editScreen);
-router.delete("/delete-screen/:id", verifyTokensAndRole, deleteScreen);
+
+router.post("/theatre/:theatre/screen",  createScreen);
+
+router.put("/theatre/:theatre/screen/:id",  editScreen);
+
+router.delete("/screen/:id",  deleteScreen);
 
 module.exports = router;

@@ -8,19 +8,17 @@ const {
   getAllLocations,
   getSingleLocation,
 } = require("../controller/location.controller");
-const verifyTokensAndRole = require("../utils/authToken.verify");
 
 const router = express.Router();
 
-router.post("/create-location", verifyTokensAndRole, createLocation);  
+router.post("/create-location", createLocation);  
 
-// Protected Routes with role and token verification
-router.put("/state", verifyTokensAndRole, editState);     
-router.put("/city", verifyTokensAndRole, editCity);      
-router.delete("/state/:state", verifyTokensAndRole, deleteState);  
-router.delete("/city/:state/:city", verifyTokensAndRole, deleteCity);  
+router.put("/state", editState);     
+router.put("/city",  editCity);      
+router.delete("/state/:state", deleteState);  
+router.delete("/city/:state/:city", deleteCity);  
 
-router.get("/locations", getAllLocations);  
+router.get("/locations/:theatreCinema", getAllLocations);  
 router.get("/location/:state", getSingleLocation);  
 
 module.exports = router;

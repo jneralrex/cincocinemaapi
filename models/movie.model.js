@@ -81,28 +81,29 @@ const movieSchema = new mongoose.Schema({
     ],
     theatre:[
         {
-            type: mongoose.SchemaTypes.ObjectId,
+            type: mongoose.Schema.Types.ObjectId,
             ref: 'Theatre',
-            // required: true,
+            required: true,
+             
         }
     ],
     streaming_date:{
-        type: mongoose.SchemaTypes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Time',
         // required: true,
     },
     streaming_time:{
-        type: mongoose.SchemaTypes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Date',
         // required: true,
     },
     class: {
-        type: mongoose.SchemaTypes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Class',
         // required: true,
     },
     seat:{
-        type: mongoose.SchemaTypes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Seat',
         // required: true,
     },

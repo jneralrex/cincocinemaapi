@@ -2,20 +2,21 @@ const mongoose = require("mongoose");
 const Event = require("../models/event.model"); 
 const errorHandler = require("../utils/errorHandler"); 
 const { cloudinary } = require("../config/config"); 
-const Location = require("../models/location.model");
+const Theatre = require("../models/theatre.model");
 
 const createEvent = async (req, res, next) => {
-  const { eventName, eventHost, eventPrice, currency, eventDate, eventTime, location } = req.body;
+  const { eventName, eventHost, eventPrice, currency, eventDate, eventTime } = req.body;
+  const { theatre } = req.params;
   const file = req.file; 
 
   try {
-    if (!eventName || !eventHost || !eventPrice || !eventDate || !eventTime || !location) {
+    if (!eventName || !eventHost || !eventPrice || !eventDate || !eventTime) {
       return next(errorHandler(400, "Missing required fields", "ValidationError"));
     }
 
-    const checkLocation = await Location.findById(location);
-    if (!checkLocation) {
-      return next(errorHandler(404, `Location does not exist`, "NotFoundError"));
+    const checkTheatre = await Theatre.findById(theatre);
+    if (!checkTheatre) {
+      return next(errorHandler(404, "Theatre does not exist", "NotFound"));
     }
 
     let uploadResponse = null;
@@ -32,7 +33,7 @@ const createEvent = async (req, res, next) => {
       currency,
       eventDate,
       eventTime,
-      location: checkLocation._id, // Store only the location ID
+      theatre,
       flyerImage: uploadResponse ? uploadResponse.secure_url : undefined,
       publicId: uploadResponse ? uploadResponse.public_id : undefined,
     });
@@ -49,8 +50,13 @@ const createEvent = async (req, res, next) => {
 };
 
 const getAllEvents = async (req, res, next) => {
+  const { theatre } = req.params; 
   try {
-    const events = await Event.find().populate("location");
+    if (!mongoose.Types.ObjectId.isValid(theatre)) {
+      return next(errorHandler(400, "Invalid theatre ID", "ValidationError"));
+    }
+
+    const events = await Event.find({ theatre }).lean();
     res.status(200).json({
       message: "Events retrieved successfully",
       events,
@@ -69,7 +75,7 @@ const getEventById = async (req, res, next) => {
   }
 
   try {
-    const event = await Event.findById(id).populate("location");
+    const event = await Event.findById(id);
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
@@ -84,8 +90,8 @@ const getEventById = async (req, res, next) => {
 };
 
 const updateEvent = async (req, res, next) => {
-  const { id } = req.params;
-  const { eventName, eventHost, eventPrice, currency, eventDate, eventTime, location } = req.body;
+  const { id, theatre } = req.params;
+  const { eventName, eventHost, eventPrice, currency, eventDate, eventTime } = req.body;
   const flyerImage = req.file; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -93,14 +99,14 @@ const updateEvent = async (req, res, next) => {
   }
 
   try {
+    const checkTheatre = await Theatre.findById(theatre);
+    if (!checkTheatre) {
+      return next(errorHandler(404, "Theatre does not exist", "NotFound"));
+    }
+
     const event = await Event.findById(id);
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
-    }
-
-    const checkLocation = await Location.findById(location);
-    if (!checkLocation) {
-      return next(errorHandler(404, `Location does not exist`, "NotFoundError"));
     }
 
     let updatedData = {
@@ -110,7 +116,9 @@ const updateEvent = async (req, res, next) => {
       currency,
       eventDate,
       eventTime,
-      location: checkLocation._id, 
+      theatre,
+      flyerImage: event.flyerImage, 
+      publicId: event.publicId
     };
 
     if (flyerImage) {
@@ -145,7 +153,7 @@ const deleteEvent = async (req, res, next) => {
   }
 
   try {
-    const event = await Event.findByIdAndDelete(id);
+    const event = await Event.findById(id);
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
@@ -153,6 +161,8 @@ const deleteEvent = async (req, res, next) => {
     if (event.publicId) {
       await cloudinary.uploader.destroy(event.publicId);
     }
+
+    await event.deleteOne();
 
     res.status(200).json({
       message: "Event deleted successfully",

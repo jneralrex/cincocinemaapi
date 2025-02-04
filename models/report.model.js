@@ -21,11 +21,16 @@ const reportSchema = new mongoose.Schema(
     referenceType: {
       type: String,
       required: true,
-      enum: ['movie', 'Event'], 
+      enum: ["movie", "Event"],
     },
     referenceId: {
       type: mongoose.Schema.Types.ObjectId,
-      refPath: 'referenceType', 
+      refPath: "referenceType",
+      required: true,
+    },
+    theatre: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Theatre",
       required: true,
     },
   },
