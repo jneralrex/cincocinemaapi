@@ -79,14 +79,11 @@ const movieSchema = new mongoose.Schema({
             stage_name: { type: String, required: true, trim: true },
         }
     ],
-    theatre:[
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Theatre',
-            required: true,
-             
-        }
-    ],
+    theatre_id:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Theatre',
+        required: true,
+    },
     streaming_date:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Time',
