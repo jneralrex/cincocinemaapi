@@ -15,7 +15,7 @@ router.get("/screen/:id", viewScreen);
 
 router.post("/theatre/:theatre/screen",  createScreen);
 
-router.put("/theatre/:theatre/screen/:id",  editScreen);
+router.patch("/theatre/:theatre/screen/:id",  editScreen);
 
 router.delete("/screen/:id",  deleteScreen);
 
