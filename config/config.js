@@ -19,6 +19,7 @@ const config = {
     duration_checker:process.env.DURATION_MULTIPLIER,
     front_end_url_1:process.env.FRONT_END_URL_1,
     front_end_url_2:process.env.FRONT_END_URL_2,
+    front_end_url_3:process.env.FRONT_END_URL_3,
     cenima_role: process.env.CENIMA_ROLE,
     theatre_role: process.env.THEATRE_ROLE,
 
