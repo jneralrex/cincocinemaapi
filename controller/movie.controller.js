@@ -3,42 +3,67 @@ const mongoose = require("mongoose");
 const Movie = require("../models/movie.model")
 
 const createMovie = async (req, res) => {
+
+    const theatre_id = req.body.theatre_id;
+    const thumbnail = req.files.thumbnail[0];
+    const banner = req.files.banner[0];
+
+    if (!mongoose.Types.ObjectId.isValid(theatre_id)) {
+        return res.status(400).json({ success: false, message: "Invalid theater id" });
+    };
+
     try {
-      const thumbnail = req.files.thumbnail[0];
-      const banner = req.files.banner[0];
+        // Parse cast & crew safely
+        let cast = [], crew = [];
+        try {
+            cast = req.body.cast ? JSON.parse(req.body.cast) : [];
+            crew = req.body.crew ? JSON.parse(req.body.crew) : [];
+        } catch (parseError) {
+            return res.status(400).json({ success: false, message: "Invalid JSON format for cast or crew" });
+        }
+
+        const movie = new Movie({
+            ...req.body,
+            cast, // Properly parsed array of objects
+            crew, // Properly parsed array of objects
+            thumbnail: { url: thumbnail.path, public_id: thumbnail.filename },
+            banner: { url: banner.path, public_id: banner.filename },
+        });
   
-      // Parse JSON strings to objects for cast and crew
-      const cast = JSON.parse(req.body.cast);
-      const crew = JSON.parse(req.body.crew);
-  
-      const movie = new Movie({
-        ...req.body,
-        cast, // Properly parsed array of objects
-        crew, // Properly parsed array of objects
-        thumbnail: { url: thumbnail.path, public_id: thumbnail.filename },
-        banner: { url: banner.path, public_id: banner.filename },
-      });
-  
-      await movie.save();
-      res.status(201).json({ success: true, message: "Movie created successfully" });
+        await movie.save();
+        res.status(201).json({ success: true, message: "Movie created successfully", data: movie });
     } catch (error) {
-      console.error("Error creating movie:", error);
-      res.status(400).json({ success: false, error: error.message });
+        console.error("Error creating movie:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
-  };
+};
   
-
 const getMovies = async (req, res) => {
-    try {
-        const { genre, title, isAvailable, limit = 10, page = 1 } = req.query; 
+    const theatreId = req.query.theatre_id;
 
-        const query = {};
+    if (!theatreId) {
+        return res.status(400).json({ success: false, message: "Invalid theatre id" });
+    }
+
+    try {
+        let { genre, title, isAvailable, limit = 10, page = 1 } = req.query;
+        
+        // Convert limit and page to numbers
+        limit = parseInt(limit, 10);
+        page = parseInt(page, 10);
+
+        const query = { theatreId }; // Include theatreId in the query
         if (genre) query.genre = genre;
         if (title) query.title = new RegExp(title, 'i'); // Case-insensitive search
         if (isAvailable !== undefined) query.isAvailable = isAvailable === 'true';
 
-        const movies = await Movie.find(query).limit(limit * 1).skip((page - 1) * limit).sort({ createdAt: -1 }); 
+        // Fetch movies with filtering, pagination, and sorting
+        const movies = await Movie.find(query)
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 });
 
+        // Count total number of matching movies
         const totalMovies = await Movie.countDocuments(query);
 
         res.status(200).json({
@@ -49,9 +74,10 @@ const getMovies = async (req, res) => {
             currentPage: page,
         });
     } catch (error) {
-        res.status(400).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
+
 const getSingleMovie = async (req, res) => {
     try {
         const { id } = req.params;

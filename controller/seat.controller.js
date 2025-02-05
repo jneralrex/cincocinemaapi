@@ -1,21 +1,26 @@
 const seatModel = require('../models/seat.model');
-const errorHandler = require('../utils/errorHandler'); 
+const errorHandler = require('../utils/errorHandler');
 
 const seatController = {
   // Create a new seat
   async createSeat(req, res, next) {
     try {
-      const { seatNumber, isBlocked, isBought } = req.body;
+      const { seatNumber, isBlocked, isBought, theatre } = req.body;
 
-      const existingSeat = await seatModel.findOne({ seatNumber });
+      if (!theatre) {
+        return next(errorHandler(400, 'Theatre ID is required', 'ValidationError'));
+      }
+
+      const existingSeat = await seatModel.findOne({ seatNumber, theatre });
       if (existingSeat) {
-        return next(errorHandler(403, 'Seat already exists', 'ValidationError'));
+        return next(errorHandler(403, 'Seat already exists in this theatre', 'ValidationError'));
       }
 
       const newSeat = new seatModel({
         seatNumber,
         isBlocked: isBlocked || false,
         isBought: isBought || false,
+        theatre, 
       });
 
       await newSeat.save();
@@ -25,22 +30,22 @@ const seatController = {
     }
   },
 
-  // Get all seats
+  // Get all seats (Populate theatre)
   async getAllSeats(req, res, next) {
     try {
-      const seats = await seatModel.find();
+      const seats = await seatModel.find().populate('theatre', 'theatreName theatreLocation'); 
       res.status(200).json({ data: seats });
     } catch (error) {
       return next(errorHandler(500, error.message, error.name || 'ServerError'));
     }
   },
 
-  // Get a seat by ID
+  // Get a seat by ID (Populate theatre)
   async getSeatById(req, res, next) {
     try {
       const { id } = req.params;
 
-      const seat = await seatModel.findById(id);
+      const seat = await seatModel.findById(id).populate('theatre', 'theatreName theatreLocation');
       if (!seat) {
         return next(errorHandler(404, 'Seat not found', 'NotFoundError'));
       }
@@ -60,7 +65,7 @@ const seatController = {
       const updatedSeat = await seatModel.findByIdAndUpdate(id, updates, {
         new: true, 
         runValidators: true, 
-      });
+      }).populate('theatre', 'theatreName theatreLocation'); 
 
       if (!updatedSeat) {
         return next(errorHandler(404, 'Seat not found', 'NotFoundError'));
@@ -90,4 +95,3 @@ const seatController = {
 };
 
 module.exports = seatController;
-
