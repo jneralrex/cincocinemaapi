@@ -57,9 +57,11 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, 
 };
 
+app.use(cors(corsOptions));
 app.use("*", cors(corsOptions));
 app.use(express.json());
 
