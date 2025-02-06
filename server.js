@@ -33,6 +33,7 @@ connectDB();
 cronJobs();
 
 app.use('/uploads',express.static(path.join(__dirname, "uploads")));
+app.use(express.json());
 app.use(cookieParser());
 app.use(
   helmet({
@@ -44,7 +45,7 @@ app.use(
 const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,
-  config.front_end_url_3,
+  config.front_end_url_2,
   'http://localhost:5173', 
 ];
 
@@ -57,16 +58,10 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, 
 };
 
 app.use(cors(corsOptions));
-app.use("*", cors(corsOptions));
-app.use(express.json());
-
-console.log("Allowed Origins:", allowedOrigins);
-
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
