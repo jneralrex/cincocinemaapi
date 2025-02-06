@@ -33,7 +33,6 @@ connectDB();
 cronJobs();
 
 app.use('/uploads',express.static(path.join(__dirname, "uploads")));
-app.use(express.json());
 app.use(cookieParser());
 app.use(
   helmet({
@@ -61,7 +60,11 @@ const corsOptions = {
   credentials: true, 
 };
 
-app.use(cors(corsOptions));
+app.use("*", cors(corsOptions));
+app.use(express.json());
+
+console.log("Allowed Origins:", allowedOrigins);
+
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
