@@ -6,6 +6,7 @@ const seatSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+<<<<<<< Updated upstream
     isBlocked: {
       type: Boolean,
       default: false,
@@ -26,3 +27,11 @@ const seatSchema = new mongoose.Schema(
 const Seat = mongoose.model("Seat", seatSchema);
 
 module.exports = Seat;
+=======
+    { timestamps: true } 
+  );
+  
+  const Seat = mongoose.model('Seat',seatSchema);
+  
+  module.exports = Seat;
+>>>>>>> Stashed changes

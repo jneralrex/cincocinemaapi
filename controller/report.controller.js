@@ -4,6 +4,7 @@ const { cloudinary } = require("../config/config");
 const Report = require("../models/report.model");
 const Movie = require("../models/movie.model");
 const Event = require("../models/event.model");
+<<<<<<< Updated upstream
 const Theatre = require("../models/theatre.model");
 
 const createReport = async (req, res, next) => {
@@ -12,6 +13,15 @@ const createReport = async (req, res, next) => {
 
   try {
     if (!reportTitle || !reportBody || !referenceType || !referenceId || !theatre) {
+=======
+
+const createReport = async (req, res, next) => {
+  const { reportTitle, reportBody, referenceType, referenceId } = req.body;
+  const file = req.file;
+
+  try {
+    if (!reportTitle || !reportBody || !referenceType || !referenceId) {
+>>>>>>> Stashed changes
       return next(errorHandler(400, "Missing required fields", "ValidationError"));
     }
 
@@ -28,6 +38,7 @@ const createReport = async (req, res, next) => {
       return next(errorHandler(404, `${referenceType} with ID ${referenceId} not found`, "NotFoundError"));
     }
 
+<<<<<<< Updated upstream
     const theatreExists = await Theatre.exists({ _id: theatre });
     if (!theatreExists) {
       return next(errorHandler(404, `Theatre with ID ${theatre} not found`, "NotFoundError"));
@@ -35,6 +46,10 @@ const createReport = async (req, res, next) => {
 
     const uploadResponse = file
       ? await cloudinary.uploader.upload(file.path, { folder: "reports" })
+=======
+    const uploadResponse = file 
+      ? await cloudinary.uploader.upload(file.path, { folder: "reports"})
+>>>>>>> Stashed changes
       : null;
 
     const newReport = new Report({
@@ -42,7 +57,10 @@ const createReport = async (req, res, next) => {
       reportBody,
       referenceType,
       referenceId,
+<<<<<<< Updated upstream
       theatre,
+=======
+>>>>>>> Stashed changes
       supportingImage: uploadResponse ? uploadResponse.secure_url : undefined,
       publicId: uploadResponse ? uploadResponse.public_id : undefined,
     });
@@ -58,6 +76,48 @@ const createReport = async (req, res, next) => {
 };
 
 const deleteReport = async (req, res, next) => {
+<<<<<<< Updated upstream
+=======
+    const { id } = req.params;
+  
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(errorHandler(400, "Invalid Report ID", "ValidationError"));
+    }
+  
+    try {
+      const report = await Report.findById(id);
+      if (!report) {
+        return next(errorHandler(404, `Report with ID ${id} not found`, "NotFoundError"));
+      }
+  
+      if (report.publicId) {
+        await cloudinary.uploader.destroy(report.publicId);
+      }
+  
+      await Report.findByIdAndDelete(id);
+  
+      let referenceExists = false;
+      if (report.referenceType === 'movie') {
+        referenceExists = await Movie.exists({ _id: report.referenceId });
+      } else if (report.referenceType === 'event') {
+        referenceExists = await Event.exists({ _id: report.referenceId });
+      }
+  
+      if (!referenceExists) {
+        return next(errorHandler(404, `${report.referenceType} with ID ${report.referenceId} not found`, "NotFoundError"));
+      }
+  
+      res.status(200).json({
+        message: "Report deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+ };
+  
+
+const viewReport = async (req, res, next) => {
+>>>>>>> Stashed changes
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -70,6 +130,7 @@ const deleteReport = async (req, res, next) => {
       return next(errorHandler(404, `Report with ID ${id} not found`, "NotFoundError"));
     }
 
+<<<<<<< Updated upstream
     if (report.publicId) {
       await cloudinary.uploader.destroy(report.publicId);
     }
@@ -95,6 +156,17 @@ const viewReport = async (req, res, next) => {
     const report = await Report.findById(id).populate("theatre");
     if (!report) {
       return next(errorHandler(404, `Report with ID ${id} not found`, "NotFoundError"));
+=======
+    let referenceExists = false;
+    if (report.referenceType === 'movie') {
+      referenceExists = await Movie.exists({ _id: report.referenceId });
+    } else if (report.referenceType === 'event') {
+      referenceExists = await Event.exists({ _id: report.referenceId });
+    }
+
+    if (!referenceExists) {
+      return next(errorHandler(404, `${report.referenceType} with ID ${report.referenceId} not found`, "NotFoundError"));
+>>>>>>> Stashed changes
     }
 
     res.status(200).json({
@@ -120,6 +192,7 @@ const editReport = async (req, res, next) => {
       return next(errorHandler(404, `Report with ID ${id} not found`, "NotFoundError"));
     }
 
+<<<<<<< Updated upstream
     let updatedData = req.body;
 
     if (file) {
@@ -127,12 +200,36 @@ const editReport = async (req, res, next) => {
         await cloudinary.uploader.destroy(report.publicId);
       }
       const uploadResponse = await cloudinary.uploader.upload(file.path, { folder: "reports" });
+=======
+    let referenceExists = false;
+    if (report.referenceType === 'movie') {
+      referenceExists = await Movie.exists({ _id: report.referenceId });
+    } else if (report.referenceType === 'event') {
+      referenceExists = await Event.exists({ _id: report.referenceId });
+    }
+
+    if (!referenceExists) {
+      return next(errorHandler(404, `${report.referenceType} with ID ${report.referenceId} not found`, "NotFoundError"));
+    }
+
+    let updatedData = req.body;
+
+    if (file) {
+      await cloudinary.uploader.destroy(report.publicId);
+      const uploadResponse = await cloudinary.uploader.upload(file.path, {
+        folder: "reports",
+      });
+>>>>>>> Stashed changes
 
       updatedData.supportingImage = uploadResponse.secure_url;
       updatedData.publicId = uploadResponse.public_id;
     }
 
+<<<<<<< Updated upstream
     const updatedReport = await Report.findByIdAndUpdate(id, updatedData, { new: true }).populate("theatre");
+=======
+    const updatedReport = await Report.findByIdAndUpdate(id, updatedData, { new: true });
+>>>>>>> Stashed changes
 
     res.status(200).json({
       message: "Report updated successfully",
@@ -145,6 +242,7 @@ const editReport = async (req, res, next) => {
 
 const viewAllReports = async (req, res, next) => {
   try {
+<<<<<<< Updated upstream
     const { theatre } = req.query; 
 
     let filters = {};
@@ -156,11 +254,31 @@ const viewAllReports = async (req, res, next) => {
     }
 
     const reports = await Report.find(filters).lean();
+=======
+    const reports = await Report.find();
+
+    for (let report of reports) {
+      let referenceExists = false;
+      if (report.referenceType === 'movie') {
+        referenceExists = await Movie.exists({ _id: report.referenceId });
+      } else if (report.referenceType === 'event') {
+        referenceExists = await Event.exists({ _id: report.referenceId });
+      }
+
+      if (!referenceExists) {
+        return next(errorHandler(404, `${report.referenceType} with ID ${report.referenceId} not found`, "NotFoundError"));
+      }
+    }
+>>>>>>> Stashed changes
 
     res.status(200).json({
       message: "All reports retrieved successfully",
       reports,
+<<<<<<< Updated upstream
       total: reports.length,
+=======
+      total:reports.length,
+>>>>>>> Stashed changes
     });
   } catch (error) {
     next(error);

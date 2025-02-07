@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+<<<<<<< Updated upstream
 const { config } = require("../config/config");
 
 const theatreSchema = new mongoose.Schema(
@@ -49,6 +50,23 @@ const theatreSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
+=======
+
+const theatreSchema = new mongoose.Schema(
+    {
+        theatreName: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        theatreLocation: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Location", 
+            required: true,
+        },
+    },
+    { timestamps: true }
+>>>>>>> Stashed changes
 );
 
 const Theatre = mongoose.model("Theatre", theatreSchema);

@@ -21,6 +21,7 @@ const reportSchema = new mongoose.Schema(
     referenceType: {
       type: String,
       required: true,
+<<<<<<< Updated upstream
       enum: ["movie", "Event"],
     },
     referenceId: {
@@ -31,6 +32,13 @@ const reportSchema = new mongoose.Schema(
     theatre: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Theatre",
+=======
+      enum: ['movie', 'Event'], 
+    },
+    referenceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: 'referenceType', 
+>>>>>>> Stashed changes
       required: true,
     },
   },
