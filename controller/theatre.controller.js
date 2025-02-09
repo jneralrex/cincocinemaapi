@@ -287,6 +287,7 @@ const createTheatre = async (req, res, next) => {
   }
 };
 
+
 const signInTheatre = async (req, res, next) => {
   const { theatreNameOrtheatreEmail, password } = req.body;
 
@@ -547,6 +548,10 @@ const verifyOtpTheatre = async (req, res, next) => {
       return next(errorHandler(400, "OTP expired", "ValidationError"));
     }
 
+    if (!theatre.otp) {
+      return next(errorHandler(400, "Invalid OTP", "ValidationError"));
+    }
+
     const isOtpValid = await bcrypt.compare(otp, theatre.otp);
     if (!isOtpValid) {
       return next(errorHandler(400, "Invalid OTP", "ValidationError"));
@@ -595,7 +600,7 @@ const resendOtpTheatre = async (req, res, next) => {
     await theatre.save();
 
     await sendEmail(
-      cinemaEmail,
+      theatreEmail,
       "Account Verification OTP",
       `Your new OTP is: ${otp}`
     );
