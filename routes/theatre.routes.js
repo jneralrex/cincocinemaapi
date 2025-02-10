@@ -1,6 +1,5 @@
 const express = require("express");
-<<<<<<< Updated upstream
-const router = express.Router();
+ const router = express.Router();
 const {
     viewAllTheatres,
     deleteTheatre,
@@ -42,26 +41,6 @@ router.patch("/resetpassword/:resetToken", resetPasswordTheatre);
 router.post("/verifyotp", verifyOtpTheatre);
 
 router.post("/resendotp", resendOtpTheatre);
-=======
-const {
-    createTheatre,
-    viewTheatre,
-    editTheatre,
-    deleteTheatre,
-    viewAllTheatres,
-  }  = require("../controller/theatre.controller");
 
-const router = express.Router();
-
-router.post("/create-theatre", createTheatre);
-
-router.get("/single-theatre/:id", viewTheatre);
-
-router.patch("/edit-theatre/:id", editTheatre);
-
-router.delete("/delete/:id", deleteTheatre);
-
-router.get("/all-theatre", viewAllTheatres);
->>>>>>> Stashed changes
 
 module.exports = router;

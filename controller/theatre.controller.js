@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const errorHandler = require("../utils/errorHandler");
 const Theatre = require("../models/theatre.model");
 const Location = require("../models/location.model");
-<<<<<<< Updated upstream
 const Cinema = require("../models/cinema.model");
 const { generateAccessToken, generateRefreshToken } = require("../utils/generate.accessToken.refreshToken");
 const { config } = require("../config/config");
@@ -606,38 +605,7 @@ const resendOtpTheatre = async (req, res, next) => {
     next(error);
   }
 };
-=======
 
-const createTheatre = async (req, res, next) => {
-    const { theatreName, theatreLocation } = req.body;
-  
-    try {
-      if (!mongoose.Types.ObjectId.isValid(theatreLocation)) {
-        return next(errorHandler(400, "Invalid location ID", "ValidationError"));
-      }
-  
-      const locationExists = await Location.findById(theatreLocation);
-      if (!locationExists) {
-        return next(errorHandler(404, "Location does not exist", "ValidationError"));
-      }
-  
-      const checkTheatre = await Theatre.findOne({ theatreName, theatreLocation });
-      if (checkTheatre) {
-        return next(errorHandler(403, "Theatre already exists", "ValidationError"));
-      }
-  
-      const newTheatre = new Theatre({ theatreName, theatreLocation });
-      await newTheatre.save();
-  
-      res.status(201).json({
-        message: "Theatre created successfully",
-        newTheatre,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
->>>>>>> Stashed changes
 
 const viewTheatre = async (req, res, next) => {
   const { id } = req.params;
@@ -647,7 +615,6 @@ const viewTheatre = async (req, res, next) => {
   }
 
   try {
-<<<<<<< Updated upstream
     const theatre = await Theatre.findById(id)
       .populate({
         path: 'theatreCinema',
@@ -657,11 +624,7 @@ const viewTheatre = async (req, res, next) => {
 
     if (!theatre) {
       return next(errorHandler(404, `Theatre with this ID does not exist`, "ValidationError"));
-=======
-    const theatre = await Theatre.findById(id).populate("theatreLocation");
-    if (!theatre) {
-      return next(errorHandler(404, `Theatre with ID ${id} does not exist`, "ValidationError"));
->>>>>>> Stashed changes
+
     }
 
     res.status(200).json({
@@ -674,18 +637,14 @@ const viewTheatre = async (req, res, next) => {
 };
 
 const editTheatre = async (req, res, next) => {
-<<<<<<< Updated upstream
   const { id, theatreCinema } = req.params;
   const { theatreName, theatreLocation } = req.body;
-=======
-  const { id } = req.params;
->>>>>>> Stashed changes
+
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(errorHandler(400, "Invalid Theatre ID", "ValidationError"));
   }
 
-<<<<<<< Updated upstream
   if (theatreCinema && !mongoose.Types.ObjectId.isValid(theatreCinema)) {
     return next(errorHandler(400, "Invalid cinema ID", "ValidationError"));
   }
@@ -702,14 +661,7 @@ const editTheatre = async (req, res, next) => {
 
     await theatre.save();
 
-=======
-  try {
-    const theatre = await Theatre.findByIdAndUpdate(id, req.body, { new: true });
-    if (!theatre) {
-      return next(errorHandler(404, `Theatre with ID ${id} does not exist`, "ValidationError"));
-    }
 
->>>>>>> Stashed changes
     res.status(200).json({
       message: "Theatre updated successfully",
       theatre,
@@ -741,7 +693,6 @@ const deleteTheatre = async (req, res, next) => {
 };
 
 const viewAllTheatres = async (req, res, next) => {
-<<<<<<< Updated upstream
   const { cinemaId, locationId } = req.query; 
 
   let filter = {};
@@ -767,22 +718,13 @@ const viewAllTheatres = async (req, res, next) => {
       message: "All theatres for this cinema retrieved successfully",
       theatres,
       total: theatres.length,
-=======
-  try {
-    const theatres = await Theatre.find().populate("theatreLocation");
 
-    res.status(200).json({
-      message: "All theatres retrieved successfully",
-      theatres,
-      total:theatres.length,
->>>>>>> Stashed changes
     });
   } catch (error) {
     next(error);
   }
 };
 
-<<<<<<< Updated upstream
 const signOutTheatre = async (req, res, next) => {
   try {
     const { theatre } = req;
@@ -803,15 +745,12 @@ const signOutTheatre = async (req, res, next) => {
   }
 };
 
-=======
->>>>>>> Stashed changes
 module.exports = {
   createTheatre,
   viewTheatre,
   editTheatre,
   deleteTheatre,
   viewAllTheatres,
-<<<<<<< Updated upstream
   signInTheatre,
   resendOtpTheatre,
   verifyOtpTheatre,
@@ -820,6 +759,4 @@ module.exports = {
   changePasswordTheatre,
   handleRefreshTokenTheatre,
   signOutTheatre,
-=======
->>>>>>> Stashed changes
 };
