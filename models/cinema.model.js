@@ -58,5 +58,26 @@ const cinemaSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
 const Cinema = mongoose.model("Cinema", cinemaSchema);
 module.exports = Cinema;
+// Cinema.collection.getIndexes().then(indexes => console.log(indexes));
+// async function removeIncorrectIndex() {
+//   try {
+//     const indexes = await Cinema.collection.getIndexes();
+//     console.log(indexes);
+
+//     // Check if the incorrect index exists before trying to drop it
+//     if (indexes.cenimaPhoneNumber_1) {
+//       await Cinema.collection.dropIndex("cenimaPhoneNumber_1");
+//       console.log("Dropped incorrect index: cenimaEmail_1");
+//     } else {
+//       console.log("Incorrect index 'cenimaEmail_1' not found.");
+//     }
+//   } catch (error) {
+//     console.error("Error removing incorrect index:", error);
+//   }
+// }
+
+// // Call the function
+// removeIncorrectIndex();

@@ -32,19 +32,10 @@ const port = config.port
 connectDB();
 cronJobs();
 
-app.use('/uploads',express.static(path.join(__dirname, "uploads")));
-app.use(express.json());
-app.use(cookieParser());
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-  })
-);
-
-
 const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,
+  config.front_end_url_3,
   'http://localhost:5173', 
 ];
 
@@ -61,6 +52,14 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use('/uploads',express.static(path.join(__dirname, "uploads")));
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/location", locationRoutes);
@@ -103,11 +102,11 @@ app.use((err, req, res, next) => {
       .json({ success: false, message: "Connection timeout." });
   }
 
-  res.status(statusCode).json({
+    res.status(statusCode).json({
     success: false,
     message: errorMessage,
   });
-});
+}); 
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
