@@ -1,11 +1,5 @@
 const mongoose = require('mongoose');
 
-const personSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },
-    image: { type: String, required: true, trim: true },
-    stage_name: { type: String, required: true, trim: true },
-});
-
 const movieSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -79,6 +73,11 @@ const movieSchema = new mongoose.Schema({
             stage_name: { type: String, required: true, trim: true },
         }
     ],
+    cinemaId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cinema',
+        required: true,
+    },
     theatre_id:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Theatre',
@@ -86,12 +85,12 @@ const movieSchema = new mongoose.Schema({
     },
     streaming_date:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Time',
+        ref: 'Date',
         // required: true,
     },
     streaming_time:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Date',
+        ref: 'Time',
         // required: true,
     },
     class: {
