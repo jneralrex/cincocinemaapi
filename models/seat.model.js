@@ -27,3 +27,23 @@ const Seat = mongoose.model("Seat", seatSchema);
 
 module.exports = Seat;
 
+
+
+// Seat.collection.getIndexes().then(indexes => console.log(indexes));
+// async function removeIncorrectIndex(){
+//   try{
+//     const indexes = await Seat.collection.getIndexes();
+//     console.log(indexes);
+
+//     if (indexes.seatNumber_1){
+//       await Seat.collection.dropIndex(" seatNumber_1");
+//       console.log("Dropped incorrect index : seatNumber_1");
+//     } else {
+//       console.log("incorrect index  seatNumber_1 not found" );
+//     }
+    
+//   }catch(error){
+//     console.error("error removing incorrect index", error)
+//   }
+// }
+// removeIncorrectIndex()
