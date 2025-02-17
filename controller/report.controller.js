@@ -12,6 +12,7 @@ const createReport = async (req, res, next) => {
 
   try {
     if (!reportTitle || !reportBody || !referenceType || !referenceId || !theatre) {
+
       return next(errorHandler(400, "Missing required fields", "ValidationError"));
     }
 
@@ -42,7 +43,7 @@ const createReport = async (req, res, next) => {
       reportBody,
       referenceType,
       referenceId,
-      theatre,
+
       supportingImage: uploadResponse ? uploadResponse.secure_url : undefined,
       publicId: uploadResponse ? uploadResponse.public_id : undefined,
     });
@@ -128,11 +129,13 @@ const editReport = async (req, res, next) => {
       }
       const uploadResponse = await cloudinary.uploader.upload(file.path, { folder: "reports" });
 
+
       updatedData.supportingImage = uploadResponse.secure_url;
       updatedData.publicId = uploadResponse.public_id;
     }
 
     const updatedReport = await Report.findByIdAndUpdate(id, updatedData, { new: true }).populate("theatre");
+
 
     res.status(200).json({
       message: "Report updated successfully",
@@ -157,10 +160,12 @@ const viewAllReports = async (req, res, next) => {
 
     const reports = await Report.find(filters).lean();
 
+
     res.status(200).json({
       message: "All reports retrieved successfully",
       reports,
       total: reports.length,
+
     });
   } catch (error) {
     next(error);
