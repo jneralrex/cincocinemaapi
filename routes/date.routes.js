@@ -1,28 +1,26 @@
-const express = require('express');
-const verifyTokensAndRole = require('../utils/authToken.verify');
+const express = require("express");
+const router = express.Router();
 const {
-    createScreeningDate,
-    getAllScreeningDates,
-    getScreeningDateById,
-    updateScreeningDate,
-    deleteScreeningDate
-} = require('../controller/date.controller');
+    addShowtimes,
+    getShowtimes,
+    updateShowtime,
+    deleteShowtime,
+    deleteAllShowtimesForMovie
+} = require("../controller/date.controller");
 
-const router = express();
+// 🎬 Add Showtimes for a Movie
+router.post("/new", addShowtimes);
 
+// 🎬 Get Showtimes for a Movie
+router.get("/:movie_id", getShowtimes);
 
-router.get("/all-dates", verifyTokensAndRole, getAllScreeningDates);
+// 🎬 Update a Specific Showtime
+router.put("/:movie_id/:date/:showtime_id", updateShowtime);
 
+// 🎬 Delete a Specific Showtime
+router.delete("/:movie_id/:date/:showtime_id", deleteShowtime);
 
-router.get("/date/:id", getScreeningDateById);
-
-
-router.post("/create-date", verifyTokensAndRole, createScreeningDate);
-
-
-router.put("/edit-date/:id", verifyTokensAndRole, updateScreeningDate);
-
-
-router.delete("/delete-date/:id", verifyTokensAndRole, deleteScreeningDate);
+// 🎬 Delete All Showtimes for a Movie
+router.delete("/:movie_id", deleteAllShowtimesForMovie);
 
 module.exports = router;

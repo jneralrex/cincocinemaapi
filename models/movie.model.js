@@ -105,7 +105,7 @@ const movieSchema = new mongoose.Schema({
     },
     isAvailable: {
         type: Boolean,
-        default: true,
+        default: false,
     },
     relatedMovies: [
         {

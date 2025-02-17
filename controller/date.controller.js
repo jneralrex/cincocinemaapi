@@ -1,94 +1,137 @@
 const DateModel = require("../models/date.model");
 const mongoose = require("mongoose");
 
-// Create a new screening date
-exports.createScreeningDate = async (req, res) => {
+// 🎬 Add Showtimes for a Movie
+const addShowtimes = async (req, res) => {
     try {
-        const { movieId, screeningDates } = req.body;
+        const { movie_id, date, show_times } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(movieId)) {
-            return res.status(400).json({ error: "Invalid Movie ID" });
+        if (!mongoose.Types.ObjectId.isValid(movie_id)) {
+            return res.status(400).json({ success: false, message: "Invalid movie ID" });
         }
 
-        const newDate = new DateModel({ movieId, screeningDates });
-        const savedDate = await newDate.save();
+        // Check if a record exists for the same movie and date
+        let movieDate = await DateModel.findOne({ movie_id, date: new Date(date) });
 
-        res.status(201).json(savedDate);
+        if (!movieDate) {
+            // If no entry exists, create a new one
+            movieDate = new DateModel({ movie_id, date, show_times });
+        } else {
+            // If an entry exists, update the show_times array
+            movieDate.show_times.push(...show_times);
+        }
+
+        await movieDate.save();
+        res.status(201).json({ success: true, message: "Showtimes added", data: movieDate });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
-// Get all screening dates
-exports.getAllScreeningDates = async (req, res) => {
+
+// 🎬 Get Showtimes for a Movie
+const getShowtimes = async (req, res) => {
     try {
-        const dates = await DateModel.find().populate("movieId").exec();
-        res.status(200).json(dates);
+        const { movie_id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(movie_id)) {
+            return res.status(400).json({ success: false, message: "Invalid movie ID" });
+        }
+
+        const showtimes = await DateModel.find({ movie_id }).populate('movie_id');
+
+        if (!showtimes.length) {
+            return res.status(404).json({ success: false, message: "No showtimes found for this movie" });
+        }
+
+        res.status(200).json({ success: true, data: showtimes });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
-// Get screening date by ID
-exports.getScreeningDateById = async (req, res) => {
+// 🎬 Update a Specific Showtime
+const updateShowtime = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { movie_id, date, showtime_id } = req.params;
+        const { time, screen_id, available_seats } = req.body;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: "Invalid ID" });
+        if (!mongoose.Types.ObjectId.isValid(movie_id) || !mongoose.Types.ObjectId.isValid(showtime_id)) {
+            return res.status(400).json({ success: false, message: "Invalid movie ID or showtime ID" });
         }
 
-        const date = await DateModel.findById(id).populate("movieId").exec();
+        let movieDate = await DateModel.findOne({ movie_id, date: new Date(date) });
 
-        if (!date) {
-            return res.status(404).json({ error: "Screening date not found" });
+        if (!movieDate) {
+            return res.status(404).json({ success: false, message: "Showtime not found" });
         }
 
-        res.status(200).json(date);
+        const showtime = movieDate.show_times.id(showtime_id);
+
+        if (!showtime) {
+            return res.status(404).json({ success: false, message: "Showtime not found" });
+        }
+
+        if (time) showtime.time = time;
+        if (screen_id) showtime.screen_id = screen_id;
+        if (available_seats !== undefined) showtime.available_seats = available_seats;
+
+        await movieDate.save();
+        res.status(200).json({ success: true, message: "Showtime updated", data: movieDate });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
-// Update a screening date
-exports.updateScreeningDate = async (req, res) => {
+// 🎬 Delete a Specific Showtime
+const deleteShowtime = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updateData = req.body;
+        const { movie_id, date, showtime_id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: "Invalid ID" });
+        if (!mongoose.Types.ObjectId.isValid(movie_id) || !mongoose.Types.ObjectId.isValid(showtime_id)) {
+            return res.status(400).json({ success: false, message: "Invalid movie ID or showtime ID" });
         }
 
-        const updatedDate = await DateModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+        let movieDate = await DateModel.findOne({ movie_id, date: new Date(date) });
 
-        if (!updatedDate) {
-            return res.status(404).json({ error: "Screening date not found" });
+        if (!movieDate) {
+            return res.status(404).json({ success: false, message: "Showtime not found" });
         }
 
-        res.status(200).json(updatedDate);
+        movieDate.show_times = movieDate.show_times.filter(show => show._id.toString() !== showtime_id);
+
+        await movieDate.save();
+        res.status(200).json({ success: true, message: "Showtime deleted", data: movieDate });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
-// Delete a screening date
-exports.deleteScreeningDate = async (req, res) => {
+// 🎬 Delete All Showtimes for a Movie
+const deleteAllShowtimesForMovie = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { movie_id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ error: "Invalid ID" });
+        if (!mongoose.Types.ObjectId.isValid(movie_id)) {
+            return res.status(400).json({ success: false, message: "Invalid movie ID" });
         }
 
-        const deletedDate = await DateModel.findByIdAndDelete(id).exec();
+        const result = await DateModel.deleteMany({ movie_id });
 
-        if (!deletedDate) {
-            return res.status(404).json({ error: "Screening date not found" });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ success: false, message: "No showtimes found for this movie" });
         }
 
-        res.status(200).json({ message: "Screening date deleted successfully" });
+        res.status(200).json({ success: true, message: "All showtimes deleted for this movie" });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: error.message });
     }
+};
+
+module.exports = {
+    addShowtimes,
+    getShowtimes,
+    updateShowtime,
+    deleteShowtime,
+    deleteAllShowtimesForMovie
 };
