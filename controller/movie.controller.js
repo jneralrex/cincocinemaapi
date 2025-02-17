@@ -5,11 +5,15 @@ const Movie = require("../models/movie.model")
 const createMovie = async (req, res) => {
 
     const theatre_id = req.body.theatre_id;
+    const cinema_id = req.body.cinemaId;
     const thumbnail = req.files.thumbnail[0];
     const banner = req.files.banner[0];
 
-    if (!mongoose.Types.ObjectId.isValid(theatre_id)) {
+    if (!theatre_id || !mongoose.Types.ObjectId.isValid(theatre_id)) {
         return res.status(400).json({ success: false, message: "Invalid theater id" });
+    };
+    if (!cinema_id || !mongoose.Types.ObjectId.isValid(cinema_id)) {
+        return res.status(400).json({ success: false, message: "Invalid cinema id" });
     };
 
     try {
@@ -37,55 +41,98 @@ const createMovie = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
-  
-const getMovies = async (req, res) => {
-    const theatreId = req.query.theatre_id;
 
-    if (!theatreId) {
-        return res.status(400).json({ success: false, message: "Invalid theatre id" });
-    }
-
+const getAllMoviesFromDatabase = async (req, res) => {
     try {
-        let { genre, title, isAvailable, limit = 10, page = 1 } = req.query;
-        
-        // Convert limit and page to numbers
-        limit = parseInt(limit, 10);
-        page = parseInt(page, 10);
+        const { genre, title, isAvailable, limit = 10, page = 1 } = req.query;
 
-        const query = { theatreId }; // Include theatreId in the query
-        if (genre) query.genre = genre;
-        if (title) query.title = new RegExp(title, 'i'); // Case-insensitive search
-        if (isAvailable !== undefined) query.isAvailable = isAvailable === 'true';
+        const parsedLimit = parseInt(limit, 10);
+        const parsedPage = parseInt(page, 10);
 
-        // Fetch movies with filtering, pagination, and sorting
+        // Ensure valid pagination values
+        if (isNaN(parsedLimit) || parsedLimit < 1) {
+            return res.status(400).json({ success: false, message: "Invalid limit value" });
+        }
+        if (isNaN(parsedPage) || parsedPage < 1) {
+            return res.status(400).json({ success: false, message: "Invalid page value" });
+        }
+
+        const query = {};
+        if (genre) query.genre = new RegExp(genre, "i"); // Case-insensitive genre search
+        if (title) query.title = new RegExp(title, "i"); // Case-insensitive title search
+        if (isAvailable !== undefined) query.isAvailable = isAvailable === "true";
+
         const movies = await Movie.find(query)
-            .limit(limit)
-            .skip((page - 1) * limit)
+            .limit(parsedLimit)
+            .skip((parsedPage - 1) * parsedLimit)
             .sort({ createdAt: -1 });
 
-        // Count total number of matching movies
         const totalMovies = await Movie.countDocuments(query);
 
         res.status(200).json({
             success: true,
             data: movies,
             totalMovies,
-            totalPages: Math.ceil(totalMovies / limit),
-            currentPage: page,
+            totalPages: Math.ceil(totalMovies / parsedLimit),
+            currentPage: parsedPage,
         });
     } catch (error) {
+        console.error("Error fetching movies:", error);
+        res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+};
+
+const getMoviesByCinema = async (req, res) => {
+    const { cinema_id, genre, title, isAvailable, limit = 10, page = 1 } = req.query;
+
+    if (!cinema_id || !mongoose.Types.ObjectId.isValid(cinema_id)) {
+        return res.status(400).json({ success: false, message: "Invalid or missing cinema ID" });
+    }
+
+    try {
+        const parsedLimit = parseInt(limit, 10);
+        const parsedPage = parseInt(page, 10);
+
+        // Build the query object
+        const query = { cinemaId: cinema_id }; // Ensure it's filtered by cinema
+
+        if (genre) query.genre = genre;
+        if (title) query.title = new RegExp(title, "i"); // Case-insensitive search
+        if (isAvailable !== undefined) query.isAvailable = isAvailable === "true";
+
+        // Fetch movies with filters, pagination, and sorting
+        const movies = await Movie.find(query)
+            .limit(parsedLimit)
+            .skip((parsedPage - 1) * parsedLimit)
+            .sort({ createdAt: -1 });
+
+        // Count total movies
+        const totalMovies = await Movie.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            data: movies,
+            totalMovies,
+            totalPages: Math.ceil(totalMovies / parsedLimit),
+            currentPage: parsedPage,
+        });
+    } catch (error) {
+        console.error("Error fetching movies:", error);
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
 
 const getSingleMovie = async (req, res) => {
     try {
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({ success: false, message: "Invalid movie id" });
+            return res.status(400).json({ success: false, message: "Invalid movie id" });
         };
+
         const movie = await Movie.findById(id)
-            .populate('streaming_location')
+            .populate({path:'cinemaId', select:"cinemaName"})
+            .populate('relatedMovies')
             .populate('streaming_date')
             .populate('streaming_time')
             .populate('class')
@@ -181,4 +228,4 @@ const toggleAvailability = async (req, res) => {
     }
 }
 
-module.exports = { getMovies, getSingleMovie, createMovie, updateMovie, deleteMovie, toggleAvailability };
+module.exports = { getAllMoviesFromDatabase, getMoviesByCinema, getSingleMovie, createMovie, updateMovie, deleteMovie, toggleAvailability };
