@@ -1,4 +1,5 @@
 const seatModel = require('../models/seat.model');
+const theatreModel = require("../models/theatre.model"); 
 const errorHandler = require('../utils/errorHandler');
 
 const seatController = {
@@ -9,12 +10,15 @@ const seatController = {
 
       if (!theatre) {
         return next(errorHandler(400, 'Theatre ID is required', 'ValidationError'));
-      }
-
-      const existingSeat = await seatModel.findOne({ seatNumber, theatre });
-      if (existingSeat) {
-        return next(errorHandler(403, 'Seat already exists in this theatre', 'ValidationError'));
-      }
+      };
+      const existingTheatre = await theatreModel.findById(theatre);
+      if(!existingTheatre){
+        return next(errorHandler(404, 'Theatre not found', 'NotFoundError'))
+      };
+      // const existingSeat = await seatModel.findOne({ seatNumber, theatre });
+      // if (existingSeat) {
+      //   return next(errorHandler(403, 'Seat already exists in this theatre', 'ValidationError'));
+      // };
 
       const newSeat = new seatModel({
         seatNumber,

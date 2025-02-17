@@ -611,6 +611,7 @@ const resendOtpTheatre = async (req, res, next) => {
   }
 };
 
+
 const viewTheatre = async (req, res, next) => {
   const { id } = req.params;
 
@@ -628,6 +629,7 @@ const viewTheatre = async (req, res, next) => {
 
     if (!theatre) {
       return next(errorHandler(404, `Theatre with this ID does not exist`, "ValidationError"));
+
     }
 
     res.status(200).json({
@@ -642,6 +644,7 @@ const viewTheatre = async (req, res, next) => {
 const editTheatre = async (req, res, next) => {
   const { id, theatreCinema } = req.params;
   const { theatreName, theatreLocation } = req.body;
+
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(errorHandler(400, "Invalid Theatre ID", "ValidationError"));
@@ -662,6 +665,7 @@ const editTheatre = async (req, res, next) => {
     theatre.theatreLocation = theatreLocation || theatre.theatreLocation;
 
     await theatre.save();
+
 
     res.status(200).json({
       message: "Theatre updated successfully",
@@ -719,6 +723,7 @@ const viewAllTheatres = async (req, res, next) => {
       message: "All theatres for this cinema retrieved successfully",
       theatres,
       total: theatres.length,
+
     });
   } catch (error) {
     next(error);

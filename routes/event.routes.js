@@ -20,4 +20,5 @@ router.patch("/edit-event/:id/:theatre",  upload.single("flyerImage"), updateEve
 
 router.delete("/delete-event/:id",  deleteEvent);
 
+
 module.exports = router;

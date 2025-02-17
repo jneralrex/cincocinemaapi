@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+ const router = express.Router();
 const {
     viewAllTheatres,
     deleteTheatre,
@@ -41,5 +41,6 @@ router.patch("/resetpassword/:resetToken", resetPasswordTheatre);
 router.post("/verifyotp", verifyOtpTheatre);
 
 router.post("/resendotp", resendOtpTheatre);
+
 
 module.exports = router;

@@ -19,6 +19,7 @@ const createEvent = async (req, res, next) => {
       return next(errorHandler(404, "Theatre does not exist", "NotFound"));
     }
 
+
     let uploadResponse = null;
     if (file) {
       uploadResponse = await cloudinary.uploader.upload(file.path, {
@@ -34,6 +35,7 @@ const createEvent = async (req, res, next) => {
       eventDate,
       eventTime,
       theatre,
+
       flyerImage: uploadResponse ? uploadResponse.secure_url : undefined,
       publicId: uploadResponse ? uploadResponse.public_id : undefined,
     });
@@ -57,6 +59,7 @@ const getAllEvents = async (req, res, next) => {
     }
 
     const events = await Event.find({ theatre }).lean();
+
     res.status(200).json({
       message: "Events retrieved successfully",
       events,
@@ -76,6 +79,7 @@ const getEventById = async (req, res, next) => {
 
   try {
     const event = await Event.findById(id);
+
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
@@ -92,6 +96,7 @@ const getEventById = async (req, res, next) => {
 const updateEvent = async (req, res, next) => {
   const { id, theatre } = req.params;
   const { eventName, eventHost, eventPrice, currency, eventDate, eventTime } = req.body;
+
   const flyerImage = req.file; 
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -109,6 +114,7 @@ const updateEvent = async (req, res, next) => {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
 
+
     let updatedData = {
       eventName,
       eventHost,
@@ -119,6 +125,7 @@ const updateEvent = async (req, res, next) => {
       theatre,
       flyerImage: event.flyerImage, 
       publicId: event.publicId
+
     };
 
     if (flyerImage) {
@@ -154,6 +161,7 @@ const deleteEvent = async (req, res, next) => {
 
   try {
     const event = await Event.findById(id);
+
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
@@ -163,6 +171,7 @@ const deleteEvent = async (req, res, next) => {
     }
 
     await event.deleteOne();
+
 
     res.status(200).json({
       message: "Event deleted successfully",

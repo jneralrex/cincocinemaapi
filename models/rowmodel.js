@@ -40,3 +40,22 @@ rowSchema.pre("findOneAndUpdate", async function (next) {
 
 const Row = mongoose.model("Row", rowSchema);
 module.exports = Row;
+
+// Row.collection.getIndexes().then(indexes => console.log(indexes));
+// async function removeIncorrectIndex(){
+//   try{
+//     const indexes = await Row.collection.getIndexes();
+//     console.log(indexes);
+
+//     if (indexes.seatIds_1){
+//       await Row.collection.dropIndex(" seatIds_1");
+//       console.log("Dropped incorrect index :  seatIds_1");
+//     } else {
+//       console.log("incorrect index  seatIds_1 not found" );
+//     }
+    
+//   }catch(error){
+//     console.error("error removing incorrect index", error)
+//   }
+// }
+// removeIncorrectIndex()
