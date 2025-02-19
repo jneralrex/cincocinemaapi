@@ -9,6 +9,8 @@ const {
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 const Cinema = require("../models/cinema.model");
+const { cloudinary } = require("../config/config");
+
 
 const signUpCinema = async (req, res, next) => { 
   const {
@@ -510,6 +512,73 @@ const updateCinema = async (req, res, next) => {
       next(errorHandler(500, "Internal server error"));
     }
   };
+
+  const deleteFromCloudinary = async (publicId) => {
+    if (!publicId) {
+      console.warn("Public ID is missing for deletion");
+      return false;
+    }
+  
+    try {
+      const result = await cloudinary.uploader.destroy(publicId);
+      if (result.result !== "ok") {
+        throw new Error(`Failed to delete image with public ID: ${publicId}`);
+      }
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete ${publicId}:`, error);
+      return false;
+    }
+  };
+
+const deleteAccount = async (req, res, next) => {
+    try {
+      const cinema = await Cinema.findById(req.params.id);
+      if (!cinema) {
+        return res.status(404).json({ success: false, error: "cinema not found" });
+      }
+  
+      const deletionPromises = [];
+  
+      if (cinema.profilePhotoPublicId) {
+        deletionPromises.push(deleteFromCloudinary(cinema.profilePhotoPublicId));
+      } else {
+        console.warn(
+          `Missing publicId for profile photo of user ${req.params.id}`
+        );
+      }
+  
+      if (cinema.images?.length) {
+        cinema.images.forEach((image) => {
+          if (image.publicId) {
+            deletionPromises.push(deleteFromCloudinary(cinema.publicId));
+          } else {
+            console.warn(`Missing publicId for image of cinema ${req.params.id}`);
+          }
+        });
+      }
+  
+      const deletionResults = await Promise.allSettled(deletionPromises);
+  
+      deletionResults.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`Failed to delete image ${index}:`, result.reason);
+        } else {
+          console.log(`Image ${index} deleted successfully`);
+        }
+      });
+  
+      await cinema.findByIdAndDelete(req.params.id);
+  
+      res.status(200).clearCookie("accesstoken").json({
+        success: true,
+        message: "Account, Cookies and associated images successfully deleted",
+      });
+    } catch (error) {
+      console.error("Error during account deletion:", error);
+      next();
+    }
+  };
   
 
 module.exports = {
@@ -524,4 +593,5 @@ module.exports = {
   resetPasswordCinema,
   updateCinema,
   getAllCinema,
+  deleteAccount,
 };
