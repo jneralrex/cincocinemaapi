@@ -1,10 +1,17 @@
 const DateModel = require("../models/date.model");
 const mongoose = require("mongoose");
+const Movie = require("../models/movie.model");
+const Theatre = require("../models/theatre.model");
 
 // 🎬 Add Showtimes for a Movie
 const addShowtimes = async (req, res) => {
     try {
         const { movie_id, date, show_times } = req.body;
+        const theatre_id = req.body.theatre_id;
+
+        if (!theatre_id || !mongoose.Types.ObjectId.isValid(theatre_id)) {
+                return res.status(400).json({ success: false, message: "Invalid theater id" });
+            };
 
         if (!mongoose.Types.ObjectId.isValid(movie_id)) {
             return res.status(400).json({ success: false, message: "Invalid movie ID" });
@@ -38,13 +45,17 @@ const getShowtimes = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid movie ID" });
         }
 
-        const showtimes = await DateModel.find({ movie_id }).populate('movie_id');
+        const showtimes = await DateModel.find({ movie_id })
+        .populate('movie_id', 'title thumbnail')
+        .populate('show_times.screen_id');
 
         if (!showtimes.length) {
             return res.status(404).json({ success: false, message: "No showtimes found for this movie" });
         }
+        const movie = await Movie.findById(movie_id).populate('theatre_id');
+        if(!movie) return res.status(404).json({ success: false, message: "No movie fond" });
 
-        res.status(200).json({ success: true, data: showtimes });
+        res.status(200).json({ success: true, data: showtimes, movie: movie });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
