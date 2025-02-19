@@ -567,7 +567,7 @@ const deleteAccount = async (req, res, next) => {
         }
       });
   
-      await cinema.findByIdAndDelete(req.params.id);
+      await Cinema.findByIdAndDelete(req.params.id);
   
       res.status(200).clearCookie("accesstoken").json({
         success: true,
@@ -586,7 +586,7 @@ const getCinemaById = async (req, res, next) => {
     return next(errorHandler(404, "Cinema not found", "NotFound"))
   }
 
-  res.status(200).json({ success: true, user });
+  res.status(200).json({ success: true, cinema });
 };
   
 
