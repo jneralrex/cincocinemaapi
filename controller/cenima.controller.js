@@ -434,6 +434,32 @@ const resendOtpCinema = async (req, res, next) => {
   }
 };
 
+const getAllCinema = asyncHandler(async (req, res, next) => {
+  const { page = 1, limit = 10 } = req.query;
+
+  const pageNumber = parseInt(page, 10);
+  const limitNumber = parseInt(limit, 10);
+
+  if (isNaN(pageNumber) || isNaN(limitNumber)) {
+    return next(errorHandler(400, "Invalid pagination parameters", "ValidationErorr"));
+  }
+
+  const users = await Cinema.find()
+    .skip((pageNumber - 1) * limitNumber) 
+    .limit(limitNumber) 
+    .select("-password", "-refreshToken", "-otp"); 
+
+  const totalCenima = await Cinema.countDocuments();
+
+  res.status(200).json({
+    success: true,
+    users,
+    totalCenima,
+    totalPages: Math.ceil(totalCenima / limitNumber),
+    currentPage: pageNumber,
+  });
+});
+
 const updateCinema = async (req, res, next) => {
     const { id } = req.params;
     const updateData = req.body;
@@ -491,4 +517,5 @@ module.exports = {
   resendOtpCinema,
   resetPasswordCinema,
   updateCinema,
+  getAllCinema,
 };
