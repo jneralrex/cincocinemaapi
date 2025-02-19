@@ -11,7 +11,6 @@ const sendEmail = require("../utils/sendMail");
 const Cinema = require("../models/cinema.model");
 const { cloudinary } = require("../config/config");
 
-
 const signUpCinema = async (req, res, next) => { 
   const {
     cinemaName,
@@ -511,9 +510,9 @@ const updateCinema = async (req, res, next) => {
   
       next(errorHandler(500, "Internal server error"));
     }
-  };
+};
 
-  const deleteFromCloudinary = async (publicId) => {
+const deleteFromCloudinary = async (publicId) => {
     if (!publicId) {
       console.warn("Public ID is missing for deletion");
       return false;
@@ -529,7 +528,7 @@ const updateCinema = async (req, res, next) => {
       console.error(`Failed to delete ${publicId}:`, error);
       return false;
     }
-  };
+};
 
 const deleteAccount = async (req, res, next) => {
     try {
@@ -578,7 +577,17 @@ const deleteAccount = async (req, res, next) => {
       console.error("Error during account deletion:", error);
       next();
     }
-  };
+};
+
+const getCinemaById = async (req, res, next) => {
+  const cinema = await Cinema.findById(req.params.id).select("-password");
+
+  if (!cinema) {
+    return next(errorHandler(404, "Cinema not found", "NotFound"))
+  }
+
+  res.status(200).json({ success: true, user });
+};
   
 
 module.exports = {
@@ -594,4 +603,5 @@ module.exports = {
   updateCinema,
   getAllCinema,
   deleteAccount,
+  getCinemaById,
 };
