@@ -9,8 +9,9 @@ const {
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 const Cinema = require("../models/cinema.model");
+const { cloudinary } = require("../config/config");
 
-const signUpCinema = async (req, res, next) => {
+const signUpCinema = async (req, res, next) => { 
   const {
     cinemaName,
     ownerFirstName,
@@ -434,6 +435,38 @@ const resendOtpCinema = async (req, res, next) => {
   }
 };
 
+const getAllCinema = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+  const pageNumber = parseInt(page, 10);
+  const limitNumber = parseInt(limit, 10);
+
+  if (isNaN(pageNumber) || isNaN(limitNumber)) {
+    return next(errorHandler(400, "Invalid pagination parameters", "ValidationErorr"));
+  }
+
+  const cinemas = await Cinema.find()
+    .skip((pageNumber - 1) * limitNumber) 
+    .limit(limitNumber) 
+    .select("-password -refreshToken -otp"); 
+
+  const totalCenima = await Cinema.countDocuments();
+
+  res.status(200).json({
+    success: true,
+    cinemas,
+    totalCenima,
+    totalPages: Math.ceil(totalCenima / limitNumber),
+    currentPage: pageNumber,
+  });
+  } catch (error) {
+    next(error);
+
+  }
+  
+};
+
 const updateCinema = async (req, res, next) => {
     const { id } = req.params;
     const updateData = req.body;
@@ -477,7 +510,84 @@ const updateCinema = async (req, res, next) => {
   
       next(errorHandler(500, "Internal server error"));
     }
-  };
+};
+
+const deleteFromCloudinary = async (publicId) => {
+    if (!publicId) {
+      console.warn("Public ID is missing for deletion");
+      return false;
+    }
+  
+    try {
+      const result = await cloudinary.uploader.destroy(publicId);
+      if (result.result !== "ok") {
+        throw new Error(`Failed to delete image with public ID: ${publicId}`);
+      }
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete ${publicId}:`, error);
+      return false;
+    }
+};
+
+const deleteAccount = async (req, res, next) => {
+    try {
+      const cinema = await Cinema.findById(req.params.id);
+      if (!cinema) {
+        return res.status(404).json({ success: false, error: "cinema not found" });
+      }
+  
+      const deletionPromises = [];
+  
+      if (cinema.profilePhotoPublicId) {
+        deletionPromises.push(deleteFromCloudinary(cinema.profilePhotoPublicId));
+      } else {
+        console.warn(
+          `Missing publicId for profile photo of user ${req.params.id}`
+        );
+      }
+  
+      if (cinema.images?.length) {
+        cinema.images.forEach((image) => {
+          if (image.publicId) {
+            deletionPromises.push(deleteFromCloudinary(cinema.publicId));
+          } else {
+            console.warn(`Missing publicId for image of cinema ${req.params.id}`);
+          }
+        });
+      }
+  
+      const deletionResults = await Promise.allSettled(deletionPromises);
+  
+      deletionResults.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(`Failed to delete image ${index}:`, result.reason);
+        } else {
+          console.log(`Image ${index} deleted successfully`);
+        }
+      });
+  
+      await Cinema.findByIdAndDelete(req.params.id);
+  
+      res.status(200).clearCookie("accesstoken").json({
+        success: true,
+        message: "Account, Cookies and associated images successfully deleted",
+      });
+    } catch (error) {
+      console.error("Error during account deletion:", error);
+      next();
+    }
+};
+
+const getCinemaById = async (req, res, next) => {
+  const cinema = await Cinema.findById(req.params.id).select("-password");
+
+  if (!cinema) {
+    return next(errorHandler(404, "Cinema not found", "NotFound"))
+  }
+
+  res.status(200).json({ success: true, cinema });
+};
   
 
 module.exports = {
@@ -491,4 +601,7 @@ module.exports = {
   resendOtpCinema,
   resetPasswordCinema,
   updateCinema,
+  getAllCinema,
+  deleteAccount,
+  getCinemaById,
 };

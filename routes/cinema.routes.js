@@ -1,6 +1,20 @@
-const express = require('express');
-const { signUpCinema, signInCinema, handleRefreshTokenCinema, signOutCinema, forgotPasswordCinema, changePasswordCinema, resetPasswordCinema, verifyOtpCinema, resendOtpCinema, updateCinema } = require('../controller/cenima.controller');
-const cinemaAuthToken = require('../utils/cinema.AuthToken');
+const express = require("express");
+const {
+  signUpCinema,
+  signInCinema,
+  handleRefreshTokenCinema,
+  signOutCinema,
+  forgotPasswordCinema,
+  changePasswordCinema,
+  resetPasswordCinema,
+  verifyOtpCinema,
+  resendOtpCinema,
+  updateCinema,
+  getAllCinema,
+  deleteAccount,
+  getCinemaById,
+} = require("../controller/cenima.controller");
+const cinemaAuthToken = require("../utils/cinema.AuthToken");
 const router = express.Router();
 
 router.post("/signup", signUpCinema);
@@ -13,5 +27,8 @@ router.patch("/changepassword", changePasswordCinema);
 router.patch("/resetpassword/:resetToken", resetPasswordCinema);
 router.post("/verifyotp", verifyOtpCinema);
 router.post("/resendotp", resendOtpCinema);
+router.get("/all-cinema", getAllCinema);
+router.delete("/delete/:id", deleteAccount);
+router.get("/cinema/:id", getCinemaById);
 router.patch("/updateprofile/:id", cinemaAuthToken, updateCinema);
-module.exports = router; 
+module.exports = router;

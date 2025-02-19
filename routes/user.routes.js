@@ -5,7 +5,7 @@ const { getAllUsers, getUserById, updateUser, signUpload, updateProfilePhoto, ro
 
 const userRouter = express.Router();
 
-userRouter.get("/all-users", verifyTokensAndRole, getAllUsers);
+userRouter.get("/all-users",  getAllUsers);
 userRouter.get("/individual-user/:id",  getUserById);
 userRouter.patch("/individual-user/:id",  updateUser);
 userRouter.post("/sign-upload",  signUpload);
