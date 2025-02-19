@@ -1,17 +1,29 @@
+const mongoose = require("mongoose");
 const classModel = require('../models/classmodel');
+const theatreModel = require("../models/theatre.model"); 
 const errorHandler = require('../utils/errorHandler');
 
 const classController = {
     
     // Create a new class
-    async createClass(req, res, next) {
+    async  createClass(req, res, next) {
       try {
-        const { className, numberOfRows, price, availability, theatre } = req.body; 
-
+        const { className, numberOfRows, price, availability, theatre } = req.body;
+        console.log("Request Body:", req.body); 
+    
         if (!theatre) {
           return next(errorHandler(400, "Theatre ID is required", "ValidationError"));
         }
-
+    
+        if (!mongoose.Types.ObjectId.isValid(theatre)) {
+          return next(errorHandler(400, "Invalid theatre ID format", "ValidationError"));
+        }
+    
+        const existingTheatre = await theatreModel.findById(theatre);
+        if (!existingTheatre) {
+          return next(errorHandler(404, "Theatre not found", "NotFoundError"));
+        }
+    
         const classes = new classModel({
           className,
           numberOfRows,
@@ -19,10 +31,10 @@ const classController = {
           availability,
           theatre,
         });
-
+    
         await classes.save();
     
-        res.status(201).json({ message: 'Seat class created successfully!', classes });
+        res.status(201).json({ message: "Class created successfully!", data: classes });
       } catch (error) {
         res.status(500).json({ success: false, error: error.message });
         return next(errorHandler(500, error.message, error.name || "InternalError"));

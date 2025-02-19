@@ -14,7 +14,7 @@ const classSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
-      min: 0, 
+      min: 0,
     },
     availability: {
       type: Boolean,
