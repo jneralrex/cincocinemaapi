@@ -434,8 +434,9 @@ const resendOtpCinema = async (req, res, next) => {
   }
 };
 
-const getAllCinema = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 10 } = req.query;
+const getAllCinema = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
 
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
@@ -444,7 +445,7 @@ const getAllCinema = asyncHandler(async (req, res, next) => {
     return next(errorHandler(400, "Invalid pagination parameters", "ValidationErorr"));
   }
 
-  const users = await Cinema.find()
+  const cinemas = await Cinema.find()
     .skip((pageNumber - 1) * limitNumber) 
     .limit(limitNumber) 
     .select("-password", "-refreshToken", "-otp"); 
@@ -453,12 +454,17 @@ const getAllCinema = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    users,
+    cinemas,
     totalCenima,
     totalPages: Math.ceil(totalCenima / limitNumber),
     currentPage: pageNumber,
   });
-});
+  } catch (error) {
+    next(error);
+
+  }
+  
+};
 
 const updateCinema = async (req, res, next) => {
     const { id } = req.params;
