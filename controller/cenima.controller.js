@@ -10,7 +10,7 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 const Cinema = require("../models/cinema.model");
 
-const signUpCinema = async (req, res, next) => {
+const signUpCinema = async (req, res, next) => { 
   const {
     cinemaName,
     ownerFirstName,

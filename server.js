@@ -36,6 +36,7 @@ const allowedOrigins = [
   config.front_end_url_1, 
   config.front_end_url_2,
   config.front_end_url_3,
+  config.front_end_url_4,
   'http://localhost:5173', 
 ];
 

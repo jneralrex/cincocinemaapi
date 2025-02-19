@@ -61,6 +61,7 @@ const cinemaSchema = new mongoose.Schema(
 
 const Cinema = mongoose.model("Cinema", cinemaSchema);
 module.exports = Cinema;
+
 // Cinema.collection.getIndexes().then(indexes => console.log(indexes));
 // async function removeIncorrectIndex() {
 //   try {

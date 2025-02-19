@@ -12,7 +12,7 @@ router.post("/theatre-admin/signup", signUp);
 
 router.post("/signin", signIn);
 router.post("/refreshtoken", handleRefreshToken);
-router.post("/signout", userAuthToken, signOut);
+router.post("/signout",  signOut);
 router.patch("/forgotpassword", forgotPassword);
 router.patch("/changepassword", changePassword);
 router.patch("/resetpassword/:resetToken", resetPassword);
