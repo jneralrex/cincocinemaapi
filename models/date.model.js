@@ -17,11 +17,7 @@ const dateSchema = new mongoose.Schema({
       available_seats: { type: Number, required: true, min: 0 },
     },
   ],
-  theatre_id:{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Theatre",
-    required: true
-  }
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model("Date", dateSchema);
