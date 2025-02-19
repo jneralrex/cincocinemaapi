@@ -448,7 +448,7 @@ const getAllCinema = async (req, res, next) => {
   const cinemas = await Cinema.find()
     .skip((pageNumber - 1) * limitNumber) 
     .limit(limitNumber) 
-    .select("-password", "-refreshToken", "-otp"); 
+    .select("-password -refreshToken -otp"); 
 
   const totalCenima = await Cinema.countDocuments();
 
