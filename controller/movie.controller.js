@@ -122,6 +122,46 @@ const getMoviesByCinema = async (req, res) => {
     }
 };
 
+const getMoviesByTheatre = async (req, res) => {
+    const { theatre_id, genre, title, isAvailable, limit = 10, page = 1 } = req.query;
+
+    if (!theatre_id || !mongoose.Types.ObjectId.isValid(theatre_id)) {
+        return res.status(400).json({ success: false, message: "Invalid or missing theatre ID" });
+    }
+
+    try {
+        const parsedLimit = parseInt(limit, 10);
+        const parsedPage = parseInt(page, 10);
+
+        // Build the query object
+        const query = { theatre_id: theatre_id }; // Ensure it's filtered by cinema
+
+        if (genre) query.genre = genre;
+        if (title) query.title = new RegExp(title, "i"); // Case-insensitive search
+        if (isAvailable !== undefined) query.isAvailable = isAvailable === "true";
+
+        // Fetch movies with filters, pagination, and sorting
+        const movies = await Movie.find(query)
+            .limit(parsedLimit)
+            .skip((parsedPage - 1) * parsedLimit)
+            .sort({ createdAt: -1 });
+
+        // Count total movies
+        const totalMovies = await Movie.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            data: movies,
+            totalMovies,
+            totalPages: Math.ceil(totalMovies / parsedLimit),
+            currentPage: parsedPage,
+        });
+    } catch (error) {
+        console.error("Error fetching movies:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 
 const getSingleMovie = async (req, res) => {
     try {
@@ -228,4 +268,4 @@ const toggleAvailability = async (req, res) => {
     }
 }
 
-module.exports = { getAllMoviesFromDatabase, getMoviesByCinema, getSingleMovie, createMovie, updateMovie, deleteMovie, toggleAvailability };
+module.exports = { getMoviesByTheatre, getAllMoviesFromDatabase, getMoviesByCinema, getSingleMovie, createMovie, updateMovie, deleteMovie, toggleAvailability };

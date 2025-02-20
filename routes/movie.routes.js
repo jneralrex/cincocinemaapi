@@ -7,6 +7,7 @@ const {
   deleteMovie,
   toggleAvailability,
   getAllMoviesFromDatabase,
+  getMoviesByTheatre
 } = require("../controller/movie.controller");
 const upload = require("../middleware/fileUploads");
 const verifyTokensAndRole = require("../utils/authToken.verify");
@@ -15,6 +16,7 @@ const router = express.Router();
 // non author validation routes
 router.get("/database", getAllMoviesFromDatabase)
 router.get("/", getMoviesByCinema);
+router.get("/theater", getMoviesByTheatre);
 router.get("/:id", getSingleMovie);
 
 router.post(

@@ -1,36 +1,23 @@
 const mongoose = require("mongoose");
 
 const dateSchema = new mongoose.Schema({
-  movieId: {
+  movie_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "movie",
-    required: [true, "Movie ID is required"],
+    required: true,
   },
-  screeningDates: [{
-    date: {
-      type: Date,
-      required: [true, "Screening date is required"]
+  date: { 
+    type: Date, 
+    required: true 
+  },
+  show_times: [
+    {
+      time: { type: String, required: true },
+      screen_id: { type: mongoose.Schema.Types.ObjectId, ref: "Screen", required: true },
+      available_seats: { type: Number, required: true, min: 0 },
     },
-    showTimes: [{
-      time: {
-        type: String,
-        required: [true, "Show time is required"]
-      },
-      screenId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Screen",
-        required: [true, "Screen ID is required"]
-      },
-      availableSeats: {
-        type: Number,
-        required: [true, "Available seats count is required"]
-      }
-    }]
-  }],
-  isActive: {
-    type: Boolean,
-    default: true
-  }
+  ],
+  
 }, { timestamps: true });
 
 module.exports = mongoose.model("Date", dateSchema);
