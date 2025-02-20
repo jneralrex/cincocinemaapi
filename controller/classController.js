@@ -9,7 +9,6 @@ const classController = {
     async  createClass(req, res, next) {
       try {
         const { className, numberOfRows, price, availability, theatre } = req.body;
-        console.log("Request Body:", req.body); 
     
         if (!theatre) {
           return next(errorHandler(400, "Theatre ID is required", "ValidationError"));
@@ -43,8 +42,12 @@ const classController = {
     
     // Get all classes (with theatre details)
     async getAllClasses(req, res, next) {
+        const {id}= req.params
+        if (!id){
+          return next(errorHandler(400,"Theater ID is required"))
+        }
       try {
-        const allClasses = await classModel.find().populate("theatre"); 
+        const allClasses = await classModel.find({theatre: id}).populate("theatre"); 
         res.status(200).json(allClasses);
       } catch (error) {
         return next(errorHandler(500, "Failed to retrieve classes", "ServerError"));
