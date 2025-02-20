@@ -37,12 +37,19 @@ const seatController = {
   // Get all seats (Populate theatre)
   async getAllSeats(req, res, next) {
     try {
-      const seats = await seatModel.find().populate('theatre', 'theatreName theatreLocation'); 
+      const { id } = req.params;
+      if (!id) {
+        return next(errorHandler(400, "Theatre ID is required"));
+      }
+      const seats = await seatModel.find({ theatre: id })
+        .populate('theatre', 'theatreName theatreLocation');
       res.status(200).json({ data: seats });
     } catch (error) {
       return next(errorHandler(500, error.message, error.name || 'ServerError'));
     }
   },
+  
+  
 
   // Get a seat by ID (Populate theatre)
   async getSeatById(req, res, next) {
