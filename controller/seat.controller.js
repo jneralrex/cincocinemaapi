@@ -15,11 +15,6 @@ const seatController = {
       if(!existingTheatre){
         return next(errorHandler(404, 'Theatre not found', 'NotFoundError'))
       };
-      // const existingSeat = await seatModel.findOne({ seatNumber, theatre });
-      // if (existingSeat) {
-      //   return next(errorHandler(403, 'Seat already exists in this theatre', 'ValidationError'));
-      // };
-
       const newSeat = new seatModel({
         seatNumber,
         isBlocked: isBlocked || false,
