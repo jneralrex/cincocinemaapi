@@ -611,7 +611,6 @@ const resendOtpTheatre = async (req, res, next) => {
   }
 };
 
-
 const viewTheatre = async (req, res, next) => {
   const { id } = req.params;
 

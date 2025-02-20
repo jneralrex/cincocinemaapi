@@ -43,4 +43,6 @@ router.post("/verifyotp", verifyOtpTheatre);
 router.post("/resendotp", resendOtpTheatre);
 
 
+
+
 module.exports = router;
