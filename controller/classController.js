@@ -43,6 +43,7 @@ const classController = {
     // Get all classes (with theatre details)
     async getAllClasses(req, res, next) {
         const {id}= req.params
+        
         if (!id){
           return next(errorHandler(400,"Theater ID is required"))
         }
