@@ -12,12 +12,16 @@ const dateSchema = new mongoose.Schema({
   },
   show_times: [
     {
-      time: { type: String, required: true },
-      screen_id: { type: mongoose.Schema.Types.ObjectId, ref: "Screen", required: true },
-      available_seats: { type: Number, required: true, min: 0 },
-    },
+      theatre_id: { type: mongoose.Schema.Types.ObjectId, ref: "Theatre", required: true },
+      times: [
+        {
+          time: { type: String, required: true },
+          screen_id: { type: mongoose.Schema.Types.ObjectId, ref: "Screen", required: true },
+          price: { type: Number, required: true,},
+        }
+      ]
+    }
   ],
-  
 }, { timestamps: true });
 
 module.exports = mongoose.model("Date", dateSchema);

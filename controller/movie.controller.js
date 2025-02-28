@@ -63,6 +63,7 @@ const getAllMoviesFromDatabase = async (req, res) => {
         if (isAvailable !== undefined) query.isAvailable = isAvailable === "true";
 
         const movies = await Movie.find(query)
+            .populate('cinemaId', 'cinemaName')
             .limit(parsedLimit)
             .skip((parsedPage - 1) * parsedLimit)
             .sort({ createdAt: -1 });
