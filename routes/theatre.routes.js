@@ -15,6 +15,7 @@ const {
     resendOtpTheatre,
     signInTheatre,
 } = require("../controller/theatre.controller");
+const theatreAuthToken = require("../utils/theatre.authtoken.verify");
 
 router.post("/theatres/:theatreCinema", createTheatre);
 
@@ -30,7 +31,7 @@ router.post("/signin", signInTheatre);
 
 router.post("/refreshtoken", handleRefreshTokenTheatre);
 
-router.post("/signout", signOutTheatre);
+router.post("/signout", theatreAuthToken, signOutTheatre);
 
 router.patch("/forgotpassword", forgotPasswordTheatre);
 
