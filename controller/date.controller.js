@@ -76,13 +76,34 @@ const getShowtimes = async (req, res) => {
 
         // Fetch movie details with theatre information
         const movie = await Movie.findById(movie_id)
-            .populate('theatre_id', 'name location');
+        .populate({
+            path: "theatre_id",
+            select: "theatreName theatreLocation",
+            populate: {
+                path: "theatreLocation", 
+                select: "location", 
+            },
+        })
 
         if (!movie) {
             return res.status(404).json({ success: false, message: "No movie found" });
         }
 
-        res.status(200).json({ success: true, data: showtimes, movie });
+        const formattedMovie = movie.toObject();
+
+        if (formattedMovie.theatre_id && formattedMovie.theatre_id.theatreLocation) {
+            formattedMovie.theatre_id.theatreLocation = formattedMovie.theatre_id.theatreLocation.location.map(
+                (loc) => ({
+                    state: loc.state,
+                    cities: loc.cities.map((city) => ({
+                        city: city.city,
+                        street: city.street,
+                    })),
+                })
+            );
+        }
+
+        res.status(200).json({ success: true, data: showtimes, movie: formattedMovie });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

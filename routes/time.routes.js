@@ -11,18 +11,18 @@ const {
 const router = express();
 
 
-router.get("/all-times", verifyTokensAndRole, getAllTimes);
+router.get("/all-times",  getAllTimes);
 
 
 router.get("/time/:id",  getTimeById);
 
 
-router.post("/create-time", verifyTokensAndRole, createTime);
+router.post("/create-time", createTime);
 
 
-router.put("/edit-time/:id", verifyTokensAndRole, updateTime);
+router.put("/edit-time/:id", updateTime);
 
 
-router.delete("/delete-time/:id", verifyTokensAndRole, deleteTime);
+router.delete("/delete-time/:id",  deleteTime);
 
 module.exports = router;
