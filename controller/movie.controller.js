@@ -168,21 +168,43 @@ const getSingleMovie = async (req, res) => {
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ success: false, message: "Invalid movie id" });
-        };
+        }
 
         const movie = await Movie.findById(id)
-            .populate({path:'cinemaId', select:"cinemaName"})
-            .populate({path:'theatre_id', select:"theatreName theatreLocation"})
-            .populate('relatedMovies')
-            .populate('streaming_date')
-            .populate('streaming_time')
-            .populate('class')
-            .populate('seat');
-        
+            .populate({ path: "cinemaId", select: "cinemaName" })
+            .populate({
+                path: "theatre_id",
+                select: "theatreName theatreLocation",
+                populate: {
+                    path: "theatreLocation", 
+                    select: "location", 
+                },
+            })
+            .populate("relatedMovies")
+            .populate("streaming_date")
+            .populate("streaming_time")
+            .populate("class")
+            .populate("seat");
+
         if (!movie) {
             return res.status(404).json({ success: false, message: "Movie not found" });
         }
-        res.status(200).json({ success: true, data: movie });
+
+        const formattedMovie = movie.toObject();
+
+        if (formattedMovie.theatre_id && formattedMovie.theatre_id.theatreLocation) {
+            formattedMovie.theatre_id.theatreLocation = formattedMovie.theatre_id.theatreLocation.location.map(
+                (loc) => ({
+                    state: loc.state,
+                    cities: loc.cities.map((city) => ({
+                        city: city.city,
+                        street: city.street,
+                    })),
+                })
+            );
+        }
+
+        res.status(200).json({ success: true, data: formattedMovie });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
