@@ -163,7 +163,6 @@ const getMoviesByTheatre = async (req, res) => {
     }
 };
 
-
 const getSingleMovie = async (req, res) => {
     try {
         const { id } = req.params;
@@ -173,6 +172,7 @@ const getSingleMovie = async (req, res) => {
 
         const movie = await Movie.findById(id)
             .populate({path:'cinemaId', select:"cinemaName"})
+            .populate({path:'theatre_id', select:"theatreName theatreLocation"})
             .populate('relatedMovies')
             .populate('streaming_date')
             .populate('streaming_time')
