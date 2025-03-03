@@ -306,8 +306,10 @@ const forgotPasswordCinema = async (req, res, next) => {
     cinema.passwordResetExpires = Date.now() + config.reset_password_expiration;
     await cinema.save();
 
-    const resetUrl = `${config.app_url}/reset-password/${resetToken}`;
-    const message = `Click the link to reset your password: ${resetUrl}`;
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
+      
+      const message = `Click the link to reset your password: ${resetUrl}`;
 
     await sendEmail(cinemaEmail, "Password Reset Request", message);
     res.status(200).json({ message: "Password reset email sent" });

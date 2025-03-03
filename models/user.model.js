@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const {config} = require("../config/config");
 
-const passwordValidator =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-])[A-Za-z\d!@#$%^&*()_+[\]{}|;:'",.<>?/\\`~\-]{9,}$/;
     const phoneNumberValidator = /^[+]?[0-9]{10,15}$/;
 const userSchema = new mongoose.Schema(
     {
@@ -31,8 +29,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ["user", "counter", "theatre-admin", "web-admin"],
-            default: "web-admin",
+            default: "user",
             lowercase: true,
         },
         profilePhoto: {
@@ -50,13 +47,6 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
             select: false,
-            validate: {
-                validator: function (v) {
-                    return passwordValidator.test(v);
-                },
-                message:
-                    "Password must be at least 8 characters, contain a special character, an uppercase letter, and a number.",
-            },
         },
         passwordResetToken: { type: String, select: false },
         passwordResetExpires: { type: Date, select: false },

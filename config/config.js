@@ -23,7 +23,7 @@ const config = {
     front_end_url_4:process.env.FRONT_END_URL_4,
     cenima_role: process.env.CENIMA_ROLE,
     theatre_role: process.env.THEATRE_ROLE,
-
+    counter_role: process.env.COUNTER_ROLE,
 };
 
 cloudinary.config({

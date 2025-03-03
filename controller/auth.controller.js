@@ -12,9 +12,9 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendMail");
 
 const signUp = async (req, res, next) => {
-  const { username, email, phoneNumber, password, role } = req.body;
+  const { username, email, phoneNumber, password } = req.body;
   try {
-    if (!username || !email || !phoneNumber || !password || !role) {
+    if (!username || !email || !phoneNumber || !password) {
       return next(
         errorHandler(403, "All fields are required", "ValidationError")
       );
@@ -51,18 +51,16 @@ const signUp = async (req, res, next) => {
       );
     }
 
-    const passwordRegex =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
     if (!passwordRegex.test(password)) {
-        return next(
-          errorHandler(
-            400,
-            "password must be at least 8 characters long, contain an uppercase letter, a number, and a special character.",
-            "ValidationError"
-          )
-        );
-      }
+      return next(
+        errorHandler(
+          400,
+          "Password must be at least 8 characters long, contain an uppercase letter, a number, and a special character.",
+          "ValidationError"
+        )
+      );
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -74,7 +72,6 @@ const signUp = async (req, res, next) => {
       username,
       email,
       phoneNumber,
-      role,
       otp: hashedOtp,
       otpExpires: Date.now() + config.otp_expiration,
       otpRequestedAt: Date.now(),

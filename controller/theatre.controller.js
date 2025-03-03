@@ -478,8 +478,10 @@ const forgotPasswordTheatre = async (req, res, next) => {
       theatre.passwordResetExpires = Date.now() + config.reset_password_expiration;
     await theatre.save();
 
-    const resetUrl = `${config.app_url}/reset-password/${resetToken}`;
-    const message = `Click the link to reset your password: ${resetUrl}`;
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
+      
+      const message = `Click the link to reset your password: ${resetUrl}`;
 
     await sendEmail(theatreEmail, "Password Reset Request", message);
     res.status(200).json({ message: "Password reset email sent" });
