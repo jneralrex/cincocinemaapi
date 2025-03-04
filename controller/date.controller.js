@@ -66,7 +66,15 @@ const getShowtimes = async (req, res) => {
         // Fetch showtimes, grouped by theatre
         const showtimes = await DateModel.find({ movie_id })
             .populate('movie_id', 'title thumbnail')
-            .populate('show_times.theatre_id', 'theatreName theatreLocation')
+            .populate({
+                path: 'show_times.theatre_id',
+                select: "theatreName theatreLocation",
+                populate: {
+                    path:'theatreLocation',
+                    select: "location", 
+                }
+
+            })
             .populate('show_times.times.screen_id', 'screenName screenType');
 
         if (!showtimes.length) {
