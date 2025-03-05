@@ -5,7 +5,7 @@ const { cloudinary } = require("../../config/config");
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-      allowed_formats: ["jpg", "jpeg", "png"], 
+      allowed_formats: ["jpg", "jpeg", "png", "webp"], 
     },
   });
 

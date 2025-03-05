@@ -7,11 +7,11 @@ const bookingSchema = new mongoose.Schema(
       ref: "Date",
       required: true,
     },
-    row: {
+    seatSelected:[{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Row",
+      ref: "Seat",
       required: true,
-    },
+    }],
     clientType: {
       type: String,
       required: true,
@@ -22,6 +22,12 @@ const bookingSchema = new mongoose.Schema(
       refPath: "clientType",
       required: true,
     },
+    bookingFor:{
+      type:String,
+      required:true,
+      toLowerCase:true,
+      trim:true
+      }
   },
   { timestamps: true }
 );
