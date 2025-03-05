@@ -58,8 +58,9 @@ const getAllEvents = async (req, res, next) => {
       return next(errorHandler(400, "Invalid theatre ID", "ValidationError"));
     }
 
-    const events = await Event.find({ theatre }).lean();
-
+    const events = await Event.find({ theatre })
+    .populate({ path: "theatre", select: "theatreName theatreLocation", populate: { path: "theatreLocation", select: "location" } }).lean();
+    
     res.status(200).json({
       message: "Events retrieved successfully",
       events,
@@ -78,7 +79,8 @@ const getEventById = async (req, res, next) => {
   }
 
   try {
-    const event = await Event.findById(id);
+    const event = await Event.findById(id)
+    .populate({ path: "theatre", select: "theatreName theatreLocation", populate: { path: "theatreLocation", select: "location" } }).lean();
 
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
@@ -109,7 +111,9 @@ const updateEvent = async (req, res, next) => {
       return next(errorHandler(404, "Theatre does not exist", "NotFound"));
     }
 
-    const event = await Event.findById(id);
+    const event = await Event.findById(id)
+    .populate({ path: "theatre", select: "theatreName theatreLocation", populate: { path: "theatreLocation", select: "location" } }).lean();
+    
     if (!event) {
       return next(errorHandler(404, `Event with ID ${id} not found`, "NotFoundError"));
     }
